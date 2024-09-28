@@ -1,11 +1,7 @@
 ### 可进行的行动
-[
-
 ```
-Check
+[Check, Bet(120), Bet(216), AllIn(900)]
 ```
-
-, Bet(120), Bet(216), AllIn(900)]
 
 ### 范围内的手牌组合  
 **c：Club** | **d：Diamond** | **s：Spade** | **h：Heart**
