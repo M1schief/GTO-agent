@@ -137,35 +137,43 @@ def check_full_house(three_of_a_kind, pairs):
 
     return False, None
 
-
 def check_straight_draw(values):
-    unique_values = set(values)
-    value_list = list(unique_values)
-    missing_values = set()
+    # 将 A 视为 1 和 14
+    hand_ranks = set(values)
 
-    value_list.sort()
-
-    # 考虑A作为1的情况
-    if 14 in value_list:
-        value_list.append(1)
-        value_list.sort()
-
-    for i in range(len(value_list) - 3):
-        window = value_list[i:i + 4]
-
-        if window[3] - window[0] == 3:
-
-            if value_list[0] > 1:
-                missing_values.add(value_list[0] - 1)
-            if value_list[-1] < 14:
-                missing_values.add(value_list[-1] + 1)
-                return True, sorted(missing_values)
-        elif window[3] - window[0] == 4:
-            missing_values = set(range(window[0], window[0] + 5)) - set(window)
-            # if len(missing_values) == 1:
-            return True, missing_values
-    return False
-
+    if 14 in values:
+        hand_ranks.add(1)
+    
+    # 计算剩余的牌数量
+    total_cards = 7  # 2 手牌 + 5 公共牌
+    N = total_cards - len(values)
+    
+    # 如果没有剩余的牌，直接返回 False 和空列表
+    if N <= 0:
+        return False, None
+    
+    # 所有可能的缺失牌组合
+    missing_combinations = []
+    for start in range(1, 11):  # 顺子的起始点数
+        straight = set(range(start, start + 5))
+        # 处理 A=14 的情况
+        if 14 in straight:
+            straight.add(1)
+        missing_cards = straight - hand_ranks
+        # 只考虑牌面在 1 到 13 的牌
+        missing_cards = set(filter(lambda x: 1 <= x <= 13, missing_cards))
+        if 0 < len(missing_cards) <= N:
+            # 按照升序排列缺失牌
+            sorted_missing = sorted(missing_cards)
+            # 避免重复组合
+            if sorted_missing not in missing_combinations:
+                missing_combinations.append(sorted_missing)
+    
+    # 判断是否存在听顺
+    if len(missing_combinations) > 0:
+        return True, missing_combinations
+    else:
+        return False, None
 
 def check_flush_draw(suit_counts, board_size):
     for count in suit_counts.values():
