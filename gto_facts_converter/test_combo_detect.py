@@ -7,7 +7,7 @@ def test_high_card_straight():
     hand1 = Hand(['Ah', 'Kd'])
     board1 = Board(['5c', '6d', '7h', '8s', '9c'])
     hand_rankings1, draws1 = evaluate_hand(hand1, board1)
-    assert hand_rankings1 == {'high_card': 14, 'one_pair': False, 'two_pair': False, 'three_of_a_kind': True, 'straight': True, 'flush': False, 'full_house': None, 'four_of_a_kind': False, 'straight_flush': False}
+    assert hand_rankings1 == {'high_card': 14, 'one_pair': False, 'two_pair': False, 'three_of_a_kind': False, 'straight': True, 'flush': False, 'full_house': None, 'four_of_a_kind': False, 'straight_flush': False}
     assert draws1 == {'straight_draw': (False, None), 'flush_draw': False, 'striaght_flush_draw': (False, [])}
 
 def test_one_pair_straight_flush():
