@@ -4,9 +4,11 @@ def evaluate_hand(hand, board):
     # 合并手牌和公共牌
     all_ranks = hand.ranks + board.ranks
     all_suits = hand.suits + board.suits
+    all_cards = hand.cards + board.cards
 
     # 统计点数和花色的频率
     value_counts = get_counts(all_ranks)
+    print(all_suits)
     suit_counts = get_counts(all_suits)
 
     # 判断同花
@@ -36,6 +38,7 @@ def evaluate_hand(hand, board):
     is_straight_draw = check_straight_draw(all_ranks)
     if not is_flush:
         is_flush_draw = check_flush_draw(suit_counts, len(board))
+    is_straight_flush_draw = check_straight_flush_draw(all_cards)
 
     # 返回结果
     hand_rankings = {
@@ -52,7 +55,8 @@ def evaluate_hand(hand, board):
 
     draws = {
         'straight_draw': is_straight_draw,
-        'flush_draw': is_flush_draw
+        'flush_draw': is_flush_draw,
+        'striaght_flush_draw': is_straight_flush_draw
     }
 
     return hand_rankings, draws
@@ -137,46 +141,92 @@ def check_full_house(three_of_a_kind, pairs):
 
     return False, None
 
-def check_straight_draw(values):
+def check_straight_draw(values, N=-1):
     # 将 A 视为 1 和 14
     hand_ranks = set(values)
 
     if 14 in values:
         hand_ranks.add(1)
     
-    # 计算剩余的牌数量
-    total_cards = 7  # 2 手牌 + 5 公共牌
-    N = total_cards - len(values)
-    
+    if N == -1:
+        # 计算剩余的牌数量
+        total_cards = 7  # 2 手牌 + 5 公共牌
+        N = total_cards - len(values)
+        
     # 如果没有剩余的牌，直接返回 False 和空列表
     if N <= 0:
         return False, None
     
-    # 所有可能的缺失牌组合
-    missing_combinations = []
+    # 存储结果的列表
+    missing_one_card_combinations = []
+    missing_two_cards_combinations = []
+    
     for start in range(1, 11):  # 顺子的起始点数
         straight = set(range(start, start + 5))
-        # 处理 A=14 的情况
-        if 14 in straight:
-            straight.add(1)
         missing_cards = straight - hand_ranks
         # 只考虑牌面在 1 到 13 的牌
         missing_cards = set(filter(lambda x: 1 <= x <= 13, missing_cards))
-        if 0 < len(missing_cards) <= N:
-            # 按照升序排列缺失牌
+        num_missing = len(missing_cards)
+        if 0 < num_missing <= N:
             sorted_missing = sorted(missing_cards)
-            # 避免重复组合
-            if sorted_missing not in missing_combinations:
-                missing_combinations.append(sorted_missing)
+            if num_missing == 1:
+                if sorted_missing not in missing_one_card_combinations:
+                    missing_one_card_combinations.append(sorted_missing)
+            elif num_missing == 2:
+                if sorted_missing not in missing_two_cards_combinations:
+                    missing_two_cards_combinations.append(sorted_missing)
+    
+    # 遍历比较，删除重复的较大牌
+    for combo_two in missing_two_cards_combinations[:]:
+        larger_card = combo_two[-1]
+        for combo_one in missing_one_card_combinations:
+            if larger_card in combo_one:
+                missing_two_cards_combinations.remove(combo_two)
+                break  # 跳出内层循环，继续检查下一个组合
+    
+    # 合并两个缺失牌组合的列表
+    missing_combinations = missing_one_card_combinations + missing_two_cards_combinations
     
     # 判断是否存在听顺
-    if len(missing_combinations) > 0:
-        return True, missing_combinations
-    else:
-        return False, None
+    has_straight_draw = bool(missing_combinations)
+    
+    return has_straight_draw, missing_combinations
+
+def check_straight_flush_draw(cards):
+    # 计算剩余的牌数量
+    total_cards = 7  # 2 手牌 + 5 公共牌
+    N = total_cards - len(cards)
+
+    if N <= 0:
+        return False, []
+
+    # 按花色分类牌
+    suits = {}
+    for value, suit in cards:
+        suits.setdefault(suit, []).append(card_value(value[0]))
+
+    has_straight_flush_draw = False
+    missing_combinations = []
+
+    # 对每个花色的牌进行听顺检测
+    for suit, values in suits.items():
+        num_cards_same_suit = len(values)
+        if num_cards_same_suit + N < 5:
+            continue  # 不可能形成同花，检查下一个花色
+        # 调用 check_straight_draw 函数
+        has_draw, missing_cards = check_straight_draw(values,N)
+
+        if has_draw:
+            has_straight_flush_draw = True
+            # 将缺失的牌附加花色信息
+            missing_cards_with_suit = [[(rank, suit) for rank in combo] for combo in missing_cards]
+            # 合并结果
+            missing_combinations.extend(missing_cards_with_suit)
+
+    return has_straight_flush_draw, missing_combinations
 
 def check_flush_draw(suit_counts, board_size):
     for count in suit_counts.values():
-        if count == board_size:
-            return True, (5 - board_size)
+        if count >= board_size:
+            return True, (5 - count)
     return False
