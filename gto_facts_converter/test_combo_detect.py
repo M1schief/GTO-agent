@@ -64,7 +64,7 @@ def test_straight_draw():
     board6 = Board(['5h', '6h', '3c'])
     hand_rankings6, draws6 = evaluate_hand(hand6, board6)
     assert hand_rankings6 == {'high_card': 6, 'one_pair': True, 'two_pair': False, 'three_of_a_kind': False, 'straight': False, 'flush': False, 'full_house': None, 'four_of_a_kind': False, 'straight_flush': False}
-    assert draws6 == {'straight_draw': (True, [[2], [7], [7, 8]]), 'flush_draw': False, 'striaght_flush_draw': (True, [[(2, 'h')], [(7, 'h')], [(7, 'h'), (8, 'h')]])}
+    assert draws6 == {'straight_draw': (True, [[2], [7], [7, 8]]), 'flush_draw': (True, 1), 'striaght_flush_draw': (True, [[(2, 'h')], [(7, 'h')], [(7, 'h'), (8, 'h')]])}
 
 def test_get_top_combinations_basic():
     hands = ["5c4c", "Ac4c", "5d4d", "Ad4d", "5h4h", "Ah4h"]
