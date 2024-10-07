@@ -1,4 +1,7 @@
 # utils.py
+import numpy as np
+import pandas as pd
+
 
 def evaluate_hand(hand, board):
     # 合并手牌和公共牌
@@ -230,3 +233,33 @@ def check_flush_draw(suit_counts, board_size):
         if count >= board_size:
             return True, (5 - count)
     return False
+
+def get_top_combinations(hands, weights, ev, effective_stack, top_n):
+    """
+    根据手牌范围、权重和EV，计算最靠近二维特征右上角的手牌组合
+    :param hands: 手牌范围列表
+    :param weights: 对应手牌的权重列表
+    :param ev: 对应手牌的EV列表
+    :param effective_stack: 用于归一化EV的有效筹码量
+    :param top_n: 返回的组合数
+    :return: 最靠近右上角的组合及其对应的weights和ev
+    """
+
+    # 1. 将输入数据加载为DataFrame
+    data = pd.DataFrame({
+        'hands': hands,
+        'weights': weights,
+        'ev': ev
+    })
+
+    # 2. 对EV进行归一化
+    data['ev_scaled'] = data['ev'] / effective_stack
+
+    # 3. 计算每个组合到(0, 0)的距离
+    data['distance'] = np.sqrt(data['weights'] ** 2 + data['ev_scaled'] ** 2)
+
+    # 4. 按距离排序，取出距离最大的 top_n 个组合
+    top_combinations = data.nlargest(top_n, 'distance')
+
+    # 5. 返回hands, weights, 和 ev
+    return top_combinations[['hands', 'weights', 'ev']]
