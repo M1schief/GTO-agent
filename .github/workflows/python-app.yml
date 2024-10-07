@@ -32,4 +32,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest GTO-agent/gto_facts_converter/test_combo_detect.py
+        pytest gto_facts_converter/test_combo_detect.py
