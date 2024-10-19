@@ -1,0 +1,9 @@
+有效筹码量：100BB
+玩家位置：BTN
+对手位置：BB
+翻前：单次加注底池。
+翻后：翻牌面是8红桃， 5红桃， 4方片，对手过牌。
+玩家手牌：J红桃，J黑桃
+玩家手牌范围：33, 44, 55, 66, 77, 88, 99, TT, JJ, QQ, KK, AA, A2s, A3s, A4s, A5s, A6s, A7s, A8s, A9s, ATs, AJs, AKs, K2s, K3s, K4s, K5s, K6s, K7s, K8s, K9s, KTs, KJs, KQs, Q6s, Q7s, Q8s, Q9s, QTs, QJs, J7s, J8s, J9s, JTs, T8s, T9s, 98s, 87s, 76s, A2o, A3o, A4o, A5o, A6o, A7o, A8o, A9o, ATo, AJo, AQo, AKo, K7o, K8o, K9o, KTo, KJo, KQo, Q9o, QTo, QJo, J9o, JTo
+对手手牌范围：33, 44, 55, 66, 77, 88, 99, TT, JJ, QQ, KK, AA, A2s, A3s, A4s, A5s, A6s, A7s, A8s, A9s, ATs, AJs, AKs, K2s, K3s, K4s, K5s, K6s, K7s, K8s, K9s, KTs, KJs, KQs, Q6s, Q7s, Q8s, Q9s, QTs, QJs, J7s, J8s, J9s, JTs, T8s, T9s, 98s, 87s, 76s, A2o, A3o, A4o, A5o, A6o, A7o, A8o, A9o, ATo, AJo, AQo, AKo, K7o, K8o, K9o, KTo, KJo, KQo, Q9o, QTo, QJo, J9o, JTo
+GTO的结果： 4%概率下注2/3底池，96%概率过牌。
