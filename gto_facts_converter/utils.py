@@ -11,7 +11,7 @@ def evaluate_hand(hand, board):
 
     # 统计点数和花色的频率
     value_counts = get_counts(all_ranks)
-    print(all_suits)
+    # print(all_suits)
     suit_counts = get_counts(all_suits)
 
     # 判断同花
@@ -45,36 +45,36 @@ def evaluate_hand(hand, board):
 
     # 返回结果
     hand_rankings = {
-        'high_card': max(all_ranks),
-        'one_pair': len(pairs) == 1,
-        'two_pair': len(pairs) >= 2,
-        'three_of_a_kind': len(three_of_a_kind) >= 1,
-        'straight': is_straight,
-        'flush': is_flush,
-        'full_house': full_house,
-        'four_of_a_kind': len(four_of_a_kind) >= 1,
-        'straight_flush': is_straight_flush
+        "high_card": max(all_ranks),
+        "one_pair": len(pairs) == 1,
+        "two_pair": len(pairs) >= 2,
+        "three_of_a_kind": len(three_of_a_kind) >= 1,
+        "straight": is_straight,
+        "flush": is_flush,
+        "full_house": full_house,
+        "four_of_a_kind": len(four_of_a_kind) >= 1,
+        "straight_flush": is_straight_flush,
     }
 
     draws = {
-        'straight_draw': is_straight_draw,
-        'flush_draw': is_flush_draw,
-        'striaght_flush_draw': is_straight_flush_draw
+        "straight_draw": is_straight_draw,
+        "flush_draw": is_flush_draw,
+        "striaght_flush_draw": is_straight_flush_draw,
     }
 
     return hand_rankings, draws
 
 
 def card_value(rank):
-    if rank == 'A':
+    if rank == "A":
         return 14  # A 可以作为最大点数
-    elif rank == 'K':
+    elif rank == "K":
         return 13
-    elif rank == 'Q':
+    elif rank == "Q":
         return 12
-    elif rank == 'J':
+    elif rank == "J":
         return 11
-    elif rank == 'T':
+    elif rank == "T":
         return 10
     else:
         return int(rank)
@@ -119,7 +119,7 @@ def check_straight(values):
         value_list.sort()
 
     for i in range(len(value_list) - 4):
-        window = value_list[i:i + 5]
+        window = value_list[i : i + 5]
         if window[4] - window[0] == 4 and len(window) == 5:
             return True, window[4]
     return False, None
@@ -144,26 +144,27 @@ def check_full_house(three_of_a_kind, pairs):
 
     return False, None
 
+
 def check_straight_draw(values, N=-1):
     # 将 A 视为 1 和 14
     hand_ranks = set(values)
 
     if 14 in values:
         hand_ranks.add(1)
-    
+
     if N == -1:
         # 计算剩余的牌数量
         total_cards = 7  # 2 手牌 + 5 公共牌
         N = total_cards - len(values)
-        
+
     # 如果没有剩余的牌，直接返回 False 和空列表
     if N <= 0:
         return False, None
-    
+
     # 存储结果的列表
     missing_one_card_combinations = []
     missing_two_cards_combinations = []
-    
+
     for start in range(1, 11):  # 顺子的起始点数
         straight = set(range(start, start + 5))
         missing_cards = straight - hand_ranks
@@ -178,7 +179,7 @@ def check_straight_draw(values, N=-1):
             elif num_missing == 2:
                 if sorted_missing not in missing_two_cards_combinations:
                     missing_two_cards_combinations.append(sorted_missing)
-    
+
     # 遍历比较，删除重复的较大牌
     for combo_two in missing_two_cards_combinations[:]:
         larger_card = combo_two[-1]
@@ -186,14 +187,15 @@ def check_straight_draw(values, N=-1):
             if larger_card in combo_one:
                 missing_two_cards_combinations.remove(combo_two)
                 break  # 跳出内层循环，继续检查下一个组合
-    
+
     # 合并两个缺失牌组合的列表
     missing_combinations = missing_one_card_combinations + missing_two_cards_combinations
-    
+
     # 判断是否存在听顺
     has_straight_draw = bool(missing_combinations)
-    
+
     return has_straight_draw, missing_combinations
+
 
 def check_straight_flush_draw(cards):
     # 计算剩余的牌数量
@@ -217,7 +219,7 @@ def check_straight_flush_draw(cards):
         if num_cards_same_suit + N < 5:
             continue  # 不可能形成同花，检查下一个花色
         # 调用 check_straight_draw 函数
-        has_draw, missing_cards = check_straight_draw(values,N)
+        has_draw, missing_cards = check_straight_draw(values, N)
 
         if has_draw:
             has_straight_flush_draw = True
@@ -228,11 +230,13 @@ def check_straight_flush_draw(cards):
 
     return has_straight_flush_draw, missing_combinations
 
+
 def check_flush_draw(suit_counts, board_size):
     for count in suit_counts.values():
         if count >= board_size:
             return True, (5 - count)
     return False
+
 
 def get_top_combinations(hands, weights, ev, effective_stack, top_n):
     """
@@ -246,20 +250,16 @@ def get_top_combinations(hands, weights, ev, effective_stack, top_n):
     """
 
     # 1. 将输入数据加载为DataFrame
-    data = pd.DataFrame({
-        'hands': hands,
-        'weights': weights,
-        'ev': ev
-    })
+    data = pd.DataFrame({"hands": hands, "weights": weights, "ev": ev})
 
     # 2. 对EV进行归一化
-    data['ev_scaled'] = data['ev'] / effective_stack
+    data["ev_scaled"] = data["ev"] / effective_stack
 
     # 3. 计算每个组合到(0, 0)的距离
-    data['distance'] = np.sqrt(data['weights'] ** 2 + data['ev_scaled'] ** 2)
+    data["distance"] = np.sqrt(data["weights"] ** 2 + data["ev_scaled"] ** 2)
 
     # 4. 按距离排序，取出距离最大的 top_n 个组合
-    top_combinations = data.nlargest(top_n, 'distance')
+    top_combinations = data.nlargest(top_n, "distance")
 
     # 5. 返回hands, weights, 和 ev
-    return top_combinations[['hands', 'weights', 'ev']]
+    return top_combinations[["hands", "weights", "ev"]]

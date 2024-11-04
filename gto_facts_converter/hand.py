@@ -1,4 +1,4 @@
-from utils import card_value
+from .utils import card_value
 
 
 class Hand:
@@ -11,8 +11,8 @@ class Hand:
         if not isinstance(cards, list) or len(cards) != 2:
             raise ValueError("必须提供两张牌的列表")
 
-        valid_ranks = ['A', 'K', 'Q', 'J', 'T'] + [str(n) for n in range(2, 10)]
-        valid_suits = ['h', 'd', 's', 'c']
+        valid_ranks = ["A", "K", "Q", "J", "T"] + [str(n) for n in range(2, 10)]
+        valid_suits = ["h", "d", "s", "c"]
 
         # 解析输入的牌
         parsed_cards = []

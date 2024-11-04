@@ -2,69 +2,174 @@ import pytest
 from board import Board
 from hand import Hand
 from utils import evaluate_hand, get_top_combinations
+
+
 def test_high_card_straight():
     # 示例 1: 测试一手高牌和公共牌
-    hand1 = Hand(['Ah', 'Kd'])
-    board1 = Board(['5c', '6d', '7h', '8s', '9c'])
+    hand1 = Hand(["Ah", "Kd"])
+    board1 = Board(["5c", "6d", "7h", "8s", "9c"])
     hand_rankings1, draws1 = evaluate_hand(hand1, board1)
-    assert hand_rankings1 == {'high_card': 14, 'one_pair': False, 'two_pair': False, 'three_of_a_kind': False, 'straight': True, 'flush': False, 'full_house': None, 'four_of_a_kind': False, 'straight_flush': False}
-    assert draws1 == {'straight_draw': (False, None), 'flush_draw': False, 'striaght_flush_draw': (False, [])}
+    assert hand_rankings1 == {
+        "high_card": 14,
+        "one_pair": False,
+        "two_pair": False,
+        "three_of_a_kind": False,
+        "straight": True,
+        "flush": False,
+        "full_house": None,
+        "four_of_a_kind": False,
+        "straight_flush": False,
+    }
+    assert draws1 == {"straight_draw": (False, None), "flush_draw": False, "straight_flush_draw": (False, [])}
+
 
 def test_one_pair_straight_flush():
     # 示例 2: 测试一手对子和公共牌
-    hand2 = Hand(['2h', '2s'])
-    board2 = Board(['6h', '7h', '8h', '9d'])
+    hand2 = Hand(["2h", "2s"])
+    board2 = Board(["6h", "7h", "8h", "9d"])
     hand_rankings2, draws2 = evaluate_hand(hand2, board2)
-    assert hand_rankings2 == {'high_card': 9, 'one_pair': True, 'two_pair': False, 'three_of_a_kind': False, 'straight': False, 'flush': False, 'full_house': None, 'four_of_a_kind': False, 'straight_flush': False}
-    assert draws2 == {'straight_draw': (True, [[5], [10]]), 'flush_draw': (True, 1), 'striaght_flush_draw': (False, [])}
+    assert hand_rankings2 == {
+        "high_card": 9,
+        "one_pair": True,
+        "two_pair": False,
+        "three_of_a_kind": False,
+        "straight": False,
+        "flush": False,
+        "full_house": None,
+        "four_of_a_kind": False,
+        "straight_flush": False,
+    }
+    assert draws2 == {"straight_draw": (True, [[5], [10]]), "flush_draw": (True, 1), "striaght_flush_draw": (False, [])}
+
 
 def test_royal_flush():
     # 示例 3: 测试同花顺
-    hand3 = Hand(['Th', 'Jh'])
-    board3 = Board(['Ah', 'Kh', 'Qh', '2d', '3s'])
+    hand3 = Hand(["Th", "Jh"])
+    board3 = Board(["Ah", "Kh", "Qh", "2d", "3s"])
     hand_rankings3, draws3 = evaluate_hand(hand3, board3)
-    assert hand_rankings3 == {'high_card': 14, 'one_pair': False, 'two_pair': False, 'three_of_a_kind': False, 'straight': True, 'flush': True, 'full_house': None, 'four_of_a_kind': False, 'straight_flush': True}
-    assert draws3 == {'straight_draw': (False, None), 'flush_draw': False, 'striaght_flush_draw': (False, [])}
+    assert hand_rankings3 == {
+        "high_card": 14,
+        "one_pair": False,
+        "two_pair": False,
+        "three_of_a_kind": False,
+        "straight": True,
+        "flush": True,
+        "full_house": None,
+        "four_of_a_kind": False,
+        "straight_flush": True,
+    }
+    assert draws3 == {"straight_draw": (False, None), "flush_draw": False, "striaght_flush_draw": (False, [])}
+
 
 def test_four_of_a_kind():
     # 示例 4: 测试四条
-    hand4 = Hand(['8d', '8s'])
-    board4 = Board(['8h', '8c', '7h', '2s', '9c'])
+    hand4 = Hand(["8d", "8s"])
+    board4 = Board(["8h", "8c", "7h", "2s", "9c"])
     hand_rankings4, draws4 = evaluate_hand(hand4, board4)
-    assert hand_rankings4 == {'high_card': 9, 'one_pair': False, 'two_pair': False, 'three_of_a_kind': False, 'straight': False, 'flush': False, 'full_house': None, 'four_of_a_kind': True, 'straight_flush': False}
-    assert draws4 == {'straight_draw': (False, None), 'flush_draw': False, 'striaght_flush_draw': (False, [])}
+    assert hand_rankings4 == {
+        "high_card": 9,
+        "one_pair": False,
+        "two_pair": False,
+        "three_of_a_kind": False,
+        "straight": False,
+        "flush": False,
+        "full_house": None,
+        "four_of_a_kind": True,
+        "straight_flush": False,
+    }
+    assert draws4 == {"straight_draw": (False, None), "flush_draw": False, "striaght_flush_draw": (False, [])}
+
 
 def test_flush_draw():
     # 示例 5: 测试三张公共牌的情况（翻牌）
-    hand5 = Hand(['Kc', 'Qc'])
-    board5 = Board(['Ac', '5h', '7c'])
+    hand5 = Hand(["Kc", "Qc"])
+    board5 = Board(["Ac", "5h", "7c"])
     hand_rankings5, draws5 = evaluate_hand(hand5, board5)
-    assert hand_rankings5 == {'high_card': 14, 'one_pair': False, 'two_pair': False, 'three_of_a_kind': False, 'straight': False, 'flush': False, 'full_house': None, 'four_of_a_kind': False, 'straight_flush': False}
-    assert draws5 == {'straight_draw': (True, [[10, 11]]), 'flush_draw': (True, 1), 'striaght_flush_draw': (True, [[(10, 'c'), (11, 'c')]])}
+    assert hand_rankings5 == {
+        "high_card": 14,
+        "one_pair": False,
+        "two_pair": False,
+        "three_of_a_kind": False,
+        "straight": False,
+        "flush": False,
+        "full_house": None,
+        "four_of_a_kind": False,
+        "straight_flush": False,
+    }
+    assert draws5 == {
+        "straight_draw": (True, [[10, 11]]),
+        "flush_draw": (True, 1),
+        "striaght_flush_draw": (True, [[(10, "c"), (11, "c")]]),
+    }
+
 
 def test_flush_draw_2():
     # 示例 5: 测试三张公共牌的情况（翻牌）
-    hand5 = Hand(['Kc', 'Qc'])
-    board5 = Board(['Ac', '5h', '7h'])
+    hand5 = Hand(["Kc", "Qc"])
+    board5 = Board(["Ac", "5h", "7h"])
     hand_rankings5, draws5 = evaluate_hand(hand5, board5)
-    assert hand_rankings5 == {'high_card': 14, 'one_pair': False, 'two_pair': False, 'three_of_a_kind': False, 'straight': False, 'flush': False, 'full_house': None, 'four_of_a_kind': False, 'straight_flush': False}
-    assert draws5 == {'straight_draw': (True, [[10, 11]]), 'flush_draw': (True, 2), 'striaght_flush_draw': (True, [[(10, 'c'), (11, 'c')]])}
+    assert hand_rankings5 == {
+        "high_card": 14,
+        "one_pair": False,
+        "two_pair": False,
+        "three_of_a_kind": False,
+        "straight": False,
+        "flush": False,
+        "full_house": None,
+        "four_of_a_kind": False,
+        "straight_flush": False,
+    }
+    assert draws5 == {
+        "straight_draw": (True, [[10, 11]]),
+        "flush_draw": (True, 2),
+        "striaght_flush_draw": (True, [[(10, "c"), (11, "c")]]),
+    }
+
 
 def test_straight_flush_draw():
     # 示例 6: 测试四张公共牌的情况（转牌）
-    hand6 = Hand(['9h', 'Th'])
-    board6 = Board(['Jh', 'Qh', '2c', '3d'])
+    hand6 = Hand(["9h", "Th"])
+    board6 = Board(["Jh", "Qh", "2c", "3d"])
     hand_rankings6, draws6 = evaluate_hand(hand6, board6)
-    assert hand_rankings6 == {'high_card': 12, 'one_pair': False, 'two_pair': False, 'three_of_a_kind': False, 'straight': False, 'flush': False, 'full_house': None, 'four_of_a_kind': False, 'straight_flush': False}
-    assert draws6 == {'straight_draw': (True, [[8], [13]]), 'flush_draw': (True, 1), 'striaght_flush_draw': (True, [[(8, 'h')], [(13, 'h')]])}
+    assert hand_rankings6 == {
+        "high_card": 12,
+        "one_pair": False,
+        "two_pair": False,
+        "three_of_a_kind": False,
+        "straight": False,
+        "flush": False,
+        "full_house": None,
+        "four_of_a_kind": False,
+        "straight_flush": False,
+    }
+    assert draws6 == {
+        "straight_draw": (True, [[8], [13]]),
+        "flush_draw": (True, 1),
+        "striaght_flush_draw": (True, [[(8, "h")], [(13, "h")]]),
+    }
 
 
 def test_straight_draw():
-    hand6 = Hand(['3h', '4h'])
-    board6 = Board(['5h', '6h', '3c'])
+    hand6 = Hand(["3h", "4h"])
+    board6 = Board(["5h", "6h", "3c"])
     hand_rankings6, draws6 = evaluate_hand(hand6, board6)
-    assert hand_rankings6 == {'high_card': 6, 'one_pair': True, 'two_pair': False, 'three_of_a_kind': False, 'straight': False, 'flush': False, 'full_house': None, 'four_of_a_kind': False, 'straight_flush': False}
-    assert draws6 == {'straight_draw': (True, [[2], [7], [7, 8]]), 'flush_draw': (True, 1), 'striaght_flush_draw': (True, [[(2, 'h')], [(7, 'h')], [(7, 'h'), (8, 'h')]])}
+    assert hand_rankings6 == {
+        "high_card": 6,
+        "one_pair": True,
+        "two_pair": False,
+        "three_of_a_kind": False,
+        "straight": False,
+        "flush": False,
+        "full_house": None,
+        "four_of_a_kind": False,
+        "straight_flush": False,
+    }
+    assert draws6 == {
+        "straight_draw": (True, [[2], [7], [7, 8]]),
+        "flush_draw": (True, 1),
+        "striaght_flush_draw": (True, [[(2, "h")], [(7, "h")], [(7, "h"), (8, "h")]]),
+    }
+
 
 def test_get_top_combinations_basic():
     hands = ["5c4c", "Ac4c", "5d4d", "Ad4d", "5h4h", "Ah4h"]
@@ -76,9 +181,10 @@ def test_get_top_combinations_basic():
     result = get_top_combinations(hands, weights, ev, effective_stack, top_n)
 
     expected_hands = ["Ad4d", "5d4d"]
-    assert result['hands'].tolist() == expected_hands
-    assert result['weights'].tolist() == [0.34322658, 2.6768225e-7]
-    assert result['ev'].tolist() == [49.417976, 36.724407]
+    assert result["hands"].tolist() == expected_hands
+    assert result["weights"].tolist() == [0.34322658, 2.6768225e-7]
+    assert result["ev"].tolist() == [49.417976, 36.724407]
+
 
 def test_get_top_combinations_all_zero_weights():
     hands = ["5c4c", "Ac4c", "5d4d"]
@@ -90,9 +196,10 @@ def test_get_top_combinations_all_zero_weights():
     result = get_top_combinations(hands, weights, ev, effective_stack, top_n)
 
     expected_hand = ["5d4d"]
-    assert result['hands'].tolist() == expected_hand
-    assert result['weights'].tolist() == [0.0]
-    assert result['ev'].tolist() == [8.0]
+    assert result["hands"].tolist() == expected_hand
+    assert result["weights"].tolist() == [0.0]
+    assert result["ev"].tolist() == [8.0]
+
 
 def test_get_top_combinations_single_combination():
     hands = ["5c4c"]
@@ -104,9 +211,10 @@ def test_get_top_combinations_single_combination():
     result = get_top_combinations(hands, weights, ev, effective_stack, top_n)
 
     expected_hand = ["5c4c"]
-    assert result['hands'].tolist() == expected_hand
-    assert result['weights'].tolist() == [0.2]
-    assert result['ev'].tolist() == [10.0]
+    assert result["hands"].tolist() == expected_hand
+    assert result["weights"].tolist() == [0.2]
+    assert result["ev"].tolist() == [10.0]
+
 
 def test_get_top_combinations_invalid_top_n():
     hands = ["5c4c", "Ac4c"]
@@ -119,6 +227,7 @@ def test_get_top_combinations_invalid_top_n():
 
     assert len(result) == len(hands)
 
+
 def test_get_top_combinations_no_ev():
     hands = ["5c4c", "Ac4c"]
     weights = [0.1, 0.2]
@@ -129,63 +238,521 @@ def test_get_top_combinations_no_ev():
     result = get_top_combinations(hands, weights, ev, effective_stack, top_n)
 
     expected_hand = ["Ac4c"]
-    assert result['hands'].tolist() == expected_hand
-    assert result['weights'].tolist() == [0.2]
-    assert result['ev'].tolist() == [0.0]
+    assert result["hands"].tolist() == expected_hand
+    assert result["weights"].tolist() == [0.2]
+    assert result["ev"].tolist() == [0.0]
+
 
 def test_get_top_combinations_opp_hands_data():
-    hands = ["5c4c", "Ac4c", "5d4d", "Ad4d", "5h4h", "Ah4h", "5s4s", "As4s", "6c5c", "7c5c", "8c5c", "Ac5c",
-             "6d5d", "7d5d", "8d5d", "Ad5d", "7h5h", "8h5h", "Ah5h", "6s5s", "7s5s", "8s5s", "As5s", "6d6c",
-             "6s6c", "7c6c", "8c6c", "9c6c", "6s6d", "7d6d", "8d6d", "7s6s", "8s6s", "9s6s", "7d7c", "7h7c",
-             "7s7c", "8c7c", "9c7c", "7h7d", "7s7d", "8d7d", "7s7h", "8h7h", "9h7h", "8s7s", "9s7s", "8d8c",
-             "8h8c", "8s8c", "9c8c", "Ac8c", "8h8d", "8s8d", "Ad8d", "8s8h", "9h8h", "Ah8h", "9s8s", "As8s",
-             "9h9c", "9s9c", "Kc9c", "Ac9c", "9s9h", "Kh9h", "Ah9h", "Ks9s", "As9s", "ThTc", "TsTc", "JcTc",
-             "KcTc", "AcTc", "TsTh", "JhTh", "QhTh", "KhTh", "AhTh", "JsTs", "QsTs", "KsTs", "AsTs", "JdJc",
-             "JhJc", "JsJc", "KcJc", "AcJc", "AdJc", "AhJc", "AsJc", "JhJd", "JsJd", "QdJd", "KdJd", "AcJd",
-             "AdJd", "AhJd", "AsJd", "JsJh", "QhJh", "KhJh", "AcJh", "AdJh", "AhJh", "AsJh", "QsJs", "KsJs",
-             "AcJs", "AdJs", "AhJs", "AsJs", "QhQd", "QsQd", "KcQd", "KdQd", "KhQd", "KsQd", "AcQd", "AdQd",
-             "AhQd", "AsQd", "QsQh", "KcQh", "KdQh", "KhQh", "KsQh", "AcQh", "AdQh", "AhQh", "AsQh", "KcQs",
-             "KdQs", "KhQs", "KsQs", "AcQs", "AdQs", "AhQs", "AsQs", "KdKc", "KhKc", "KsKc", "AcKc", "AdKc",
-             "AhKc", "AsKc", "KhKd", "KsKd", "AcKd", "AdKd", "AhKd", "AsKd", "KsKh", "AcKh", "AdKh", "AhKh",
-             "AsKh", "AcKs", "AdKs", "AhKs", "AsKs", "AdAc", "AhAc", "AsAc", "AhAd", "AsAd", "AsAh"]
+    hands = [
+        "5c4c",
+        "Ac4c",
+        "5d4d",
+        "Ad4d",
+        "5h4h",
+        "Ah4h",
+        "5s4s",
+        "As4s",
+        "6c5c",
+        "7c5c",
+        "8c5c",
+        "Ac5c",
+        "6d5d",
+        "7d5d",
+        "8d5d",
+        "Ad5d",
+        "7h5h",
+        "8h5h",
+        "Ah5h",
+        "6s5s",
+        "7s5s",
+        "8s5s",
+        "As5s",
+        "6d6c",
+        "6s6c",
+        "7c6c",
+        "8c6c",
+        "9c6c",
+        "6s6d",
+        "7d6d",
+        "8d6d",
+        "7s6s",
+        "8s6s",
+        "9s6s",
+        "7d7c",
+        "7h7c",
+        "7s7c",
+        "8c7c",
+        "9c7c",
+        "7h7d",
+        "7s7d",
+        "8d7d",
+        "7s7h",
+        "8h7h",
+        "9h7h",
+        "8s7s",
+        "9s7s",
+        "8d8c",
+        "8h8c",
+        "8s8c",
+        "9c8c",
+        "Ac8c",
+        "8h8d",
+        "8s8d",
+        "Ad8d",
+        "8s8h",
+        "9h8h",
+        "Ah8h",
+        "9s8s",
+        "As8s",
+        "9h9c",
+        "9s9c",
+        "Kc9c",
+        "Ac9c",
+        "9s9h",
+        "Kh9h",
+        "Ah9h",
+        "Ks9s",
+        "As9s",
+        "ThTc",
+        "TsTc",
+        "JcTc",
+        "KcTc",
+        "AcTc",
+        "TsTh",
+        "JhTh",
+        "QhTh",
+        "KhTh",
+        "AhTh",
+        "JsTs",
+        "QsTs",
+        "KsTs",
+        "AsTs",
+        "JdJc",
+        "JhJc",
+        "JsJc",
+        "KcJc",
+        "AcJc",
+        "AdJc",
+        "AhJc",
+        "AsJc",
+        "JhJd",
+        "JsJd",
+        "QdJd",
+        "KdJd",
+        "AcJd",
+        "AdJd",
+        "AhJd",
+        "AsJd",
+        "JsJh",
+        "QhJh",
+        "KhJh",
+        "AcJh",
+        "AdJh",
+        "AhJh",
+        "AsJh",
+        "QsJs",
+        "KsJs",
+        "AcJs",
+        "AdJs",
+        "AhJs",
+        "AsJs",
+        "QhQd",
+        "QsQd",
+        "KcQd",
+        "KdQd",
+        "KhQd",
+        "KsQd",
+        "AcQd",
+        "AdQd",
+        "AhQd",
+        "AsQd",
+        "QsQh",
+        "KcQh",
+        "KdQh",
+        "KhQh",
+        "KsQh",
+        "AcQh",
+        "AdQh",
+        "AhQh",
+        "AsQh",
+        "KcQs",
+        "KdQs",
+        "KhQs",
+        "KsQs",
+        "AcQs",
+        "AdQs",
+        "AhQs",
+        "AsQs",
+        "KdKc",
+        "KhKc",
+        "KsKc",
+        "AcKc",
+        "AdKc",
+        "AhKc",
+        "AsKc",
+        "KhKd",
+        "KsKd",
+        "AcKd",
+        "AdKd",
+        "AhKd",
+        "AsKd",
+        "KsKh",
+        "AcKh",
+        "AdKh",
+        "AhKh",
+        "AsKh",
+        "AcKs",
+        "AdKs",
+        "AhKs",
+        "AsKs",
+        "AdAc",
+        "AhAc",
+        "AsAc",
+        "AhAd",
+        "AsAd",
+        "AsAh",
+    ]
 
-    weights = [0.0, 0.0, 2.6768225e-7, 0.34322658, 0.0, 0.0, 0.0, 0.0, 0.0, 1.799958e-7, 0.0010804585, 0.0, 0.0,
-               0.32922614, 0.28639603, 0.42039868, 1.3482001e-7, 0.0065211067, 0.0, 0.0, 1.67378e-7, 0.003012491,
-               0.0, 0.071861975, 0.15156303, 0.0, 0.069121845, 5.769561e-9, 0.07899759, 0.0, 0.0, 0.0, 0.06488876,
-               9.967412e-5, 0.0, 0.0, 0.0, 1.3387734e-5, 0.0, 0.0, 0.0, 0.40154615, 0.0, 0.0013859302, 0.0,
-               4.0386036e-5, 2.0529748e-7, 4.0837436e-5, 0.0, 0.0, 0.0030712474, 0.0, 0.0024652362, 5.412266e-5,
-               0.21767661, 0.0, 0.0489847, 2.3504779e-7, 0.02829818, 1.5700196e-7, 0.05595135, 0.03103098,
-               0.0015410058, 0.0, 0.022941211, 0.00056555716, 0.0, 0.0038694553, 0.0, 0.16262491, 0.16255577,
-               0.045307018, 0.0021862674, 0.0, 0.05145374, 0.08025658, 0.17331569, 0.06622863, 0.0, 0.08661338,
-               0.17117861, 0.026088936, 0.0, 0.04366756, 0.029926164, 0.03561609, 0.23080745, 0.051954746,
-               0.15535395, 0.04931959, 0.053434104, 0.034399603, 0.0369606, 0.0, 0.24940097, 0.12133663, 0.21985193,
-               0.12067999, 0.12204805, 0.04777022, 0.01710607, 0.217717, 0.05500607, 0.08589807, 0.047803286,
-               0.058244817, 0.01585296, 0.20608963, 0.053222768, 0.0828029, 0.045785367, 0.05660433, 0.03159258,
-               0.03833985, 6.1982564e-6, 0.0, 0.0, 0.0, 0.010278985, 0.02468421, 0.0074595544, 0.010079215,
-               0.017371695, 0.012946884, 0.0004232559, 0.0022726043, 0.002775753, 2.362043e-6, 0.00010031719, 0.0,
-               6.872217e-6, 0.011503295, 0.00047513327, 0.001764687, 0.0025216579, 1.9442807e-6, 9.80793e-5, 0.0,
-               3.1154525e-6, 0.24001831, 0.2773977, 0.22424503, 0.035021894, 0.12578237, 0.06601465, 0.063628554,
-               0.28655463, 0.2442618, 0.19393273, 0.022512432, 0.20605178, 0.19190857, 0.27813697, 0.047747366,
-               0.12108436, 0.02308622, 0.04758573, 0.05832091, 0.11665046, 0.061076604, 0.030348781, 0.06499093,
-               0.007970602, 0.008430728, 0.06528828, 0.06630619, 0.006984226]
+    weights = [
+        0.0,
+        0.0,
+        2.6768225e-7,
+        0.34322658,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.799958e-7,
+        0.0010804585,
+        0.0,
+        0.0,
+        0.32922614,
+        0.28639603,
+        0.42039868,
+        1.3482001e-7,
+        0.0065211067,
+        0.0,
+        0.0,
+        1.67378e-7,
+        0.003012491,
+        0.0,
+        0.071861975,
+        0.15156303,
+        0.0,
+        0.069121845,
+        5.769561e-9,
+        0.07899759,
+        0.0,
+        0.0,
+        0.0,
+        0.06488876,
+        9.967412e-5,
+        0.0,
+        0.0,
+        0.0,
+        1.3387734e-5,
+        0.0,
+        0.0,
+        0.0,
+        0.40154615,
+        0.0,
+        0.0013859302,
+        0.0,
+        4.0386036e-5,
+        2.0529748e-7,
+        4.0837436e-5,
+        0.0,
+        0.0,
+        0.0030712474,
+        0.0,
+        0.0024652362,
+        5.412266e-5,
+        0.21767661,
+        0.0,
+        0.0489847,
+        2.3504779e-7,
+        0.02829818,
+        1.5700196e-7,
+        0.05595135,
+        0.03103098,
+        0.0015410058,
+        0.0,
+        0.022941211,
+        0.00056555716,
+        0.0,
+        0.0038694553,
+        0.0,
+        0.16262491,
+        0.16255577,
+        0.045307018,
+        0.0021862674,
+        0.0,
+        0.05145374,
+        0.08025658,
+        0.17331569,
+        0.06622863,
+        0.0,
+        0.08661338,
+        0.17117861,
+        0.026088936,
+        0.0,
+        0.04366756,
+        0.029926164,
+        0.03561609,
+        0.23080745,
+        0.051954746,
+        0.15535395,
+        0.04931959,
+        0.053434104,
+        0.034399603,
+        0.0369606,
+        0.0,
+        0.24940097,
+        0.12133663,
+        0.21985193,
+        0.12067999,
+        0.12204805,
+        0.04777022,
+        0.01710607,
+        0.217717,
+        0.05500607,
+        0.08589807,
+        0.047803286,
+        0.058244817,
+        0.01585296,
+        0.20608963,
+        0.053222768,
+        0.0828029,
+        0.045785367,
+        0.05660433,
+        0.03159258,
+        0.03833985,
+        6.1982564e-6,
+        0.0,
+        0.0,
+        0.0,
+        0.010278985,
+        0.02468421,
+        0.0074595544,
+        0.010079215,
+        0.017371695,
+        0.012946884,
+        0.0004232559,
+        0.0022726043,
+        0.002775753,
+        2.362043e-6,
+        0.00010031719,
+        0.0,
+        6.872217e-6,
+        0.011503295,
+        0.00047513327,
+        0.001764687,
+        0.0025216579,
+        1.9442807e-6,
+        9.80793e-5,
+        0.0,
+        3.1154525e-6,
+        0.24001831,
+        0.2773977,
+        0.22424503,
+        0.035021894,
+        0.12578237,
+        0.06601465,
+        0.063628554,
+        0.28655463,
+        0.2442618,
+        0.19393273,
+        0.022512432,
+        0.20605178,
+        0.19190857,
+        0.27813697,
+        0.047747366,
+        0.12108436,
+        0.02308622,
+        0.04758573,
+        0.05832091,
+        0.11665046,
+        0.061076604,
+        0.030348781,
+        0.06499093,
+        0.007970602,
+        0.008430728,
+        0.06528828,
+        0.06630619,
+        0.006984226,
+    ]
 
-    ev = [6.629074, 8.976952, 36.724407, 49.417976, 7.6425858, 9.297714, 6.6223373, 8.957443, 35.2434, 16.654425,
-          26.042082, 9.713364, 90.317696, 47.549038, 68.143745, 46.822815, 17.735626, 27.278738, 9.960945, 35.255623,
-          16.654402, 26.245922, 9.697266, 202.71556, 198.20277, 40.44326, 49.333633, 130.69957, 202.71185, 104.381325,
-          123.94962, 40.465816, 49.629803, 132.11148, 41.638306, 41.22283, 40.460625, 232.53033, 53.128696, 42.40249,
-          41.652927, 276.85965, 41.254955, 232.02644, 54.171127, 231.29846, 53.657406, 55.62761, 55.162014, 55.139877,
-          62.352795, 28.226723, 56.678337, 56.075394, 85.260086, 55.51067, 63.602272, 28.417336, 63.28544, 28.35678,
-          215.75775, 214.40372, 62.796143, 54.409344, 214.86522, 63.741127, 55.227562, 63.45134, 54.711796, 231.60835,
-          231.60986, 93.56227, 73.68849, 67.981735, 230.081, 94.59469, 155.69504, 75.108475, 69.333115, 94.62275,
-          155.77122, 74.5097, 68.698784, 117.64807, 115.04723, 115.059105, 361.37827, 35.733387, 41.11858, 35.90311,
-          35.699745, 117.920525, 117.92769, 186.22974, 391.8136, 37.003567, 113.8556, 37.19524, 36.97485, 115.319336,
-          121.22821, 360.7956, 36.037136, 41.64808, 36.205948, 35.998203, 121.20526, 360.80276, 36.070908, 41.680187,
-          36.243572, 36.030743, 251.24144, 251.2844, 112.190926, 179.22632, 112.89108, 112.26397, 98.40815, 175.07701,
-          99.08047, 98.40863, 246.61572, 110.4694, 115.237076, 111.093605, 110.54545, 96.63107, 103.196495, 97.3547,
-          96.63377, 110.46563, 115.23058, 111.111595, 110.52549, 96.663895, 103.23845, 97.39206, 96.659676, 139.0384,
-          134.49742, 133.95284, 25.535845, 30.747135, 25.9462, 25.876322, 139.60892, 139.0246, 26.914333, 102.00645,
-          27.04281, 26.920242, 134.47354, 25.919823, 30.754787, 25.643253, 25.922897, 25.879303, 30.689247, 25.945831,
-          25.557121, 102.3387, 96.86234, 96.307304, 102.98457, 102.34532, 96.89494]
+    ev = [
+        6.629074,
+        8.976952,
+        36.724407,
+        49.417976,
+        7.6425858,
+        9.297714,
+        6.6223373,
+        8.957443,
+        35.2434,
+        16.654425,
+        26.042082,
+        9.713364,
+        90.317696,
+        47.549038,
+        68.143745,
+        46.822815,
+        17.735626,
+        27.278738,
+        9.960945,
+        35.255623,
+        16.654402,
+        26.245922,
+        9.697266,
+        202.71556,
+        198.20277,
+        40.44326,
+        49.333633,
+        130.69957,
+        202.71185,
+        104.381325,
+        123.94962,
+        40.465816,
+        49.629803,
+        132.11148,
+        41.638306,
+        41.22283,
+        40.460625,
+        232.53033,
+        53.128696,
+        42.40249,
+        41.652927,
+        276.85965,
+        41.254955,
+        232.02644,
+        54.171127,
+        231.29846,
+        53.657406,
+        55.62761,
+        55.162014,
+        55.139877,
+        62.352795,
+        28.226723,
+        56.678337,
+        56.075394,
+        85.260086,
+        55.51067,
+        63.602272,
+        28.417336,
+        63.28544,
+        28.35678,
+        215.75775,
+        214.40372,
+        62.796143,
+        54.409344,
+        214.86522,
+        63.741127,
+        55.227562,
+        63.45134,
+        54.711796,
+        231.60835,
+        231.60986,
+        93.56227,
+        73.68849,
+        67.981735,
+        230.081,
+        94.59469,
+        155.69504,
+        75.108475,
+        69.333115,
+        94.62275,
+        155.77122,
+        74.5097,
+        68.698784,
+        117.64807,
+        115.04723,
+        115.059105,
+        361.37827,
+        35.733387,
+        41.11858,
+        35.90311,
+        35.699745,
+        117.920525,
+        117.92769,
+        186.22974,
+        391.8136,
+        37.003567,
+        113.8556,
+        37.19524,
+        36.97485,
+        115.319336,
+        121.22821,
+        360.7956,
+        36.037136,
+        41.64808,
+        36.205948,
+        35.998203,
+        121.20526,
+        360.80276,
+        36.070908,
+        41.680187,
+        36.243572,
+        36.030743,
+        251.24144,
+        251.2844,
+        112.190926,
+        179.22632,
+        112.89108,
+        112.26397,
+        98.40815,
+        175.07701,
+        99.08047,
+        98.40863,
+        246.61572,
+        110.4694,
+        115.237076,
+        111.093605,
+        110.54545,
+        96.63107,
+        103.196495,
+        97.3547,
+        96.63377,
+        110.46563,
+        115.23058,
+        111.111595,
+        110.52549,
+        96.663895,
+        103.23845,
+        97.39206,
+        96.659676,
+        139.0384,
+        134.49742,
+        133.95284,
+        25.535845,
+        30.747135,
+        25.9462,
+        25.876322,
+        139.60892,
+        139.0246,
+        26.914333,
+        102.00645,
+        27.04281,
+        26.920242,
+        134.47354,
+        25.919823,
+        30.754787,
+        25.643253,
+        25.922897,
+        25.879303,
+        30.689247,
+        25.945831,
+        25.557121,
+        102.3387,
+        96.86234,
+        96.307304,
+        102.98457,
+        102.34532,
+        96.89494,
+    ]
 
     effective_stack = 400
     top_n = 5
@@ -196,6 +763,7 @@ def test_get_top_combinations_opp_hands_data():
 
     # expected_hands = [...]
     # assert result['hands'].tolist() == expected_hands
+
 
 # def test_get_top_combinations_in_hands():
 #     hands = ["2d2c", "2h2c", "2s2c", "Ac2c", "2h2d", "2s2d", "Ad2d", "2s2h", "Ah2h", "As2s", "3d3c", "3h3c",
