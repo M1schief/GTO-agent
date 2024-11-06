@@ -252,14 +252,40 @@ def get_top_combinations(hands, weights, ev, effective_stack, top_n):
         'ev': ev
     })
 
+    # 新增标签列label
+    data['label'] = np.where(
+        data['hands'].str[1] == data['hands'].str[3],
+        data['hands'].str[0] + data['hands'].str[2] + "s",
+        data['hands'].str[0] + data['hands'].str[2] + "o"
+    )
+
     # 2. 对EV进行归一化
     data['ev_scaled'] = data['ev'] / effective_stack
 
     # 3. 计算每个组合到(0, 0)的距离
     data['distance'] = np.sqrt(data['weights'] ** 2 + data['ev_scaled'] ** 2)
 
-    # 4. 按距离排序，取出距离最大的 top_n 个组合
-    top_combinations = data.nlargest(top_n, 'distance')
+    # 4. 按距离排序
+    data = data.sort_values(by='distance', ascending=False)
 
-    # 5. 返回hands, weights, 和 ev
-    return top_combinations[['hands', 'weights', 'ev']]
+    # 5. 选择前 top_n + 1 个不同 label 的组合（允许重复，但同一label不计入计数）
+    unique_labels = set()
+    top_combinations = []
+
+    for _, row in data.iterrows():
+        label = row['label']
+        if label not in unique_labels:
+            unique_labels.add(label)
+            top_combinations.append(row)
+            if len(unique_labels) == top_n + 1:
+                break
+        else:
+            top_combinations.append(row)
+
+    # 6. 去掉最后一个组合，确保仅有 top_n 个不同的label
+    if len(unique_labels) > top_n:
+        top_combinations = top_combinations[:-1]
+
+    # 7. 转换为 DataFrame 并返回 hands, weights, ev 和 label
+    top_combinations_df = pd.DataFrame(top_combinations)
+    return top_combinations_df[['hands', 'weights', 'ev', 'label']]

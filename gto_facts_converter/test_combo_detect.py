@@ -67,21 +67,22 @@ def test_straight_draw():
     assert draws6 == {'straight_draw': (True, [[2], [7], [7, 8]]), 'flush_draw': (True, 1), 'striaght_flush_draw': (True, [[(2, 'h')], [(7, 'h')], [(7, 'h'), (8, 'h')]])}
 
 def test_get_top_combinations_basic():
-    hands = ["5c4c", "Ac4c", "5d4d", "Ad4d", "5h4h", "Ah4h"]
-    weights = [0.0, 0.0, 2.6768225e-7, 0.34322658, 0.0, 0.0]
-    ev = [6.629074, 8.976952, 36.724407, 49.417976, 7.6425858, 9.297714]
+    hands = ["5c4c", "Ac4c", "5d4d", "Ad4d", "5h4h", "Ah4h", "5d4h"]
+    weights = [0.0, 0.0, 2.6768225e-7, 0.34322658, 0.0, 0.0, 0.0]
+    ev = [6.629074, 8.976952, 36.724407, 49.417976, 7.6425858, 9.297714, 4.287543]
     effective_stack = 400
     top_n = 2
 
     result = get_top_combinations(hands, weights, ev, effective_stack, top_n)
 
-    expected_hands = ["Ad4d", "5d4d"]
+    expected_hands = ["Ad4d", "5d4d", "Ah4h", "Ac4c", "5h4h", "5c4c"]
     assert result['hands'].tolist() == expected_hands
-    assert result['weights'].tolist() == [0.34322658, 2.6768225e-7]
-    assert result['ev'].tolist() == [49.417976, 36.724407]
+    assert result['weights'].tolist() == [0.34322658, 2.6768225e-7, 0.0, 0.0, 0.0, 0.0]
+    assert result['ev'].tolist() == [49.417976, 36.724407, 9.297714, 8.976952, 7.6425858, 6.629074]
+    assert result['label'].tolist() == ["A4s", "54s", "A4s", "A4s", "54s", "54s"]
 
 def test_get_top_combinations_all_zero_weights():
-    hands = ["5c4c", "Ac4c", "5d4d"]
+    hands = ["5c4h", "Ac4c", "5d4d"]
     weights = [0.0, 0.0, 0.0]
     ev = [6.0, 7.0, 8.0]
     effective_stack = 400
@@ -93,6 +94,7 @@ def test_get_top_combinations_all_zero_weights():
     assert result['hands'].tolist() == expected_hand
     assert result['weights'].tolist() == [0.0]
     assert result['ev'].tolist() == [8.0]
+    assert result['label'].tolist() == ["54s"]
 
 def test_get_top_combinations_single_combination():
     hands = ["5c4c"]
@@ -107,16 +109,20 @@ def test_get_top_combinations_single_combination():
     assert result['hands'].tolist() == expected_hand
     assert result['weights'].tolist() == [0.2]
     assert result['ev'].tolist() == [10.0]
+    assert result['label'].tolist() == ["54s"]
 
 def test_get_top_combinations_invalid_top_n():
     hands = ["5c4c", "Ac4c"]
     weights = [0.1, 0.2]
     ev = [5.0, 6.0]
     effective_stack = 400
-    top_n = 3  # 大于hands的长度
+    top_n = 3  # larger than the number of hands available
 
     result = get_top_combinations(hands, weights, ev, effective_stack, top_n)
 
+    print(result)
+
+    # Expecting all available combinations, so the length should match `hands`
     assert len(result) == len(hands)
 
 def test_get_top_combinations_no_ev():
@@ -132,6 +138,7 @@ def test_get_top_combinations_no_ev():
     assert result['hands'].tolist() == expected_hand
     assert result['weights'].tolist() == [0.2]
     assert result['ev'].tolist() == [0.0]
+    assert result['label'].tolist() == ["A4s"]
 
 def test_get_top_combinations_opp_hands_data():
     hands = ["5c4c", "Ac4c", "5d4d", "Ad4d", "5h4h", "Ah4h", "5s4s", "As4s", "6c5c", "7c5c", "8c5c", "Ac5c",
@@ -192,7 +199,7 @@ def test_get_top_combinations_opp_hands_data():
 
     result = get_top_combinations(hands, weights, ev, effective_stack, top_n)
 
-    print(result)
+    # print(result)
 
     # expected_hands = [...]
     # assert result['hands'].tolist() == expected_hands
@@ -277,7 +284,7 @@ def test_get_top_combinations_opp_hands_data():
 #
 #     result = get_top_combinations(hands, weights, ev, effective_stack, top_n)
 #
-#     print(result)
+    print(result)
 #
 #     # expected_hands = [...]
 #     # assert result['hands'].tolist() == expected_hands
