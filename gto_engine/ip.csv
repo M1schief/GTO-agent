@@ -1,0 +1,17 @@
+Hand,OpponentRange,Weight,Combos,CurrentBoard,Player,SelectedActions,Equity,EV,EQR,Allin 84 %,Allin 84 EV,Call %,Call EV,Fold %,Fold EV
+AsAh,AdQc,0.134462,0.189712,Ac Th 6h Td 4d,oop,Bet 6;Call;Bet 10;Call;Check;Bet 16,1,98.1282,1.88708,1,98.1282,0,68,0,0
+AhAd,AhQc,0.134462,0.189712,,,,1,98.1282,1.88708,1,98.1282,0,68,0,0
+AhQh,AsQc,0.627418,1.77044,,,,0.1964,0.364915,0.035731,0.097756,0.654696,0.604684,0.497639,0.29756,0
+KsQs,AhQd,0.129585,0.428881,,,,0,0,NaN,0,-7.091812,0,-16.000004,1,0
+KdQd,AsQd,0.129585,0.428881,,,,0,0,NaN,0,-7.091812,0,-16.000004,1,0
+KcQc,AdQs,0.120108,0.288184,,,,0,0,NaN,0,-30.235165,0,-16,1,0
+,AhQs,,,,,
+,AdKc,,,,,
+,AhKc,,,,,
+,AsKc,,,,,
+,AhKd,,,,,
+,AsKd,,,,,
+,AdKh,,,,,
+,AsKh,,,,,
+,AdKs,,,,,
+,AhKs,,,,,
