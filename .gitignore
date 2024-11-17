@@ -2,3 +2,8 @@ gto_facts_converter/__pycache__/board.cpython-37.pyc
 gto_facts_converter/__pycache__/hand.cpython-37.pyc
 gto_facts_converter/__pycache__/utils.cpython-37.pyc
 gto_facts_converter/__pycache__/test_combo_detect.cpython-37-pytest-7.4.4.pyc
+wasm-postflop/dist/
+wasm-postflop/node_modules/
+wasm-postflop/pkg/
+wasm-postflop/public/google*.html
+wasm-postflop/rust/**/target/
