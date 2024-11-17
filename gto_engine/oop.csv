@@ -1,10 +1,14 @@
-Hand,OpponentRange,Weight,Combos,CurrentBoard,Player,SelectedActions,Call %,Call EV,Fold %,Fold EV
-AsAh,,0.173092,0.173092,Ac Th 6h Td 4d,oop,Bet 6;Call;Bet 10;Call;Bet 16;Allin 84,1,0,0,0
-AsAd,,0.110828,0.110828,,,,1,0,0,0
-AhAd,,0.173092,0.173092,,,,1,0,0,0
-AsKs,,0.890882,0.890882,,,,1,0,0,0
-AhKh,,0.903348,0.903348,,,,1,0,0,0
-AdKd,,0.890882,0.890882,,,,1,0,0,0
-KsKc,,0.117531,0.117531,,,,0,0,1,0
-KhKc,,0.221655,0.221655,,,,0,0,1,0
-KdKc,,0.117531,0.117531,,,,0,0,1,0
+Hand,OpponentRange,Weight,Combos,CurrentBoard,Player,SelectedActions,Equity,EV,EQR
+AhKh,KdQc,0.766052,1.65248,As Ac Kc 8h 3h,oop,Bet 6;Call;Bet 10;Call;Bet 16;Call,0.829478,67.6701,1.19973
+AdKd,KhQc,0.766052,1.65248,,,,0.829478,67.6701,1.19973
+KsKh,KsQc,0.300031,0.956922,,,,0.867862,61.3574,1.0397
+KsKd,AdQc,0.300031,0.956922,,,,0.867862,61.3574,1.0397
+KhKd,AhQc,0.19368,0.80727,,,,0.646992,45.7572,1.04004
+KsQs,AhQd,0.045986,0.138418,,,,0.024086,15.6418,9.5504
+KhQh,AdQh,0.171443,0.752447,,,,0.008399,15.7825,27.6333
+KdQd,AdQs,0.171443,0.752447,,,,0.008399,15.7825,27.6333
+,AhQs,,,,,
+,AhKd,,,,,
+,AdKh,,,,,
+,AdKs,,,,,
+,AhKs,,,,,
