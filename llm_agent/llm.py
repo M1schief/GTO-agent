@@ -4,9 +4,10 @@ import argparse
 import time
 import json
 
+import random
+import pandas as pd
 
 import openai
-from tqdm import tqdm
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -29,6 +30,18 @@ TERM_MAP = {
     "straight_flush_draw": "同花顺听牌",
 }
 
+QUERY = """
+有效筹码量：{effective_stack}BB
+玩家位置：{player_position}
+对手位置：{op_position}
+玩家手牌：{hand}
+翻前：单次加注底池
+翻后：{game}
+玩家手牌范围：{player_range}
+对手手牌范围：{op_range}
+GTO的结果：{gto}
+"""
+
 SYSTEM_PROMPT = """你是一个德州扑克游戏中的解释器。"""
 
 # pylint: disable=line-too-long
@@ -40,7 +53,7 @@ USER_PROMPT = """结合玩家位置、对手位置、玩家手牌、玩家手牌
 下面首先会展示几个正确的例子:
 {example}
 
-学习完了上面几个例子，请基于下面的局面信息，按照初步分析和术语表，解释GTO策略中各项动作的原因：
+学习完了上面几个例子，请基于下面的局面信息，按照初步分析和术语表，解释GTO结果中各项动作的原因：
 {query}
 
 在举例时，你需要参靠下面的初步分析：
@@ -76,26 +89,77 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def process_raw(engine_results: dict) -> tuple:
-    hand = Hand(engine_results["hand"])
-    board = Board(engine_results["board"])
-    # 面high是否需要单独处理？
+def process_raw() -> str:
+    # read from the engine or the game?
+    effective_stack = 100
+    player_position = "BTN"
+    op_position = "BB"
+    player_id = "ip"
+
+    # take player as in-position for now
+    player_data = pd.read_csv("llm_agent/ip.csv")
+    player_range = player_data["Hand"].dropna().tolist()
+    player_weight = player_data["Weight"].dropna().tolist()
+
+    board = player_data["CurrentBoard"].dropna().tolist()
+    board = board[0].split()
+    action_history = player_data["SelectedActions"].dropna().tolist()
+    action_history = action_history[0].split(";")
+    player_ev = player_data["EV"].dropna().tolist()
+
+    op_data = pd.read_csv("llm_agent/oop.csv")
+    op_range = op_data["Hand"].dropna().tolist()
+    op_weight = op_data["Weight"].dropna().tolist()
+    op_ev = op_data["EV"].dropna().tolist()
+
+    # random a hand and its GTO results
+    action_space = [player_data.columns[-2], player_data.columns[-4], player_data.columns[-6]]
+    n = random.randint(0, len(player_data) - 1)
+    hand = player_range[n]
+    action_probs = [f"{action[:-2]}:{player_data.iloc[n][action]*100}%" for action in action_space]
+    gto = ", ".join(action_probs)
+
+    # actions of two players
+    if player_id == "ip":
+        player_actions = action_history[1::2]
+        op_actions = action_history[0::2]
+    else:
+        player_actions = action_history[0::2]
+        op_actions = action_history[1::2]
+
+    # game history
+    game = f"翻牌面是{board[0]}，{board[1]}，{board[2]}，对手{op_actions[0]}，玩家{player_actions[0]}\n"
+    if len(board) >= 4:
+        game += f"转牌面是{board[3]}，对手{op_actions[1]}，玩家{player_actions[1]}\n"
+    if len(board) == 5:
+        game += f"河牌面是{board[4]}，对手{op_actions[2]}，玩家{player_actions[2]}"
+
+    # query preparation
+    query = QUERY.format(
+        effective_stack=effective_stack,
+        player_position=player_position,
+        op_position=op_position,
+        hand=hand,
+        game=game,
+        player_range=player_range,
+        op_range=op_range,
+        gto=gto,
+    )
+
+    with open("llm_agent/query.txt", "w") as f:
+        f.write(query)
+
+    # prepare analysis
+    hand = Hand([hand[:2], hand[2:]])
+    board = Board(board)
     hand_rankings, draws = evaluate_hand(hand, board)
 
-    # TODO:这里的tops应该用对手数据做输入
-    tops = get_top_combinations(
-        engine_results["hands"], engine_results["weights"], engine_results["ev"], effective_stack=400, top_n=2
-    )
-    return hand_rankings, draws, tops
-
-
-def fill_analysis(result: tuple) -> str:
     analysis = "玩家已经成牌："
-    hand_rankings, draws, tops = result
     for key, value in list(reversed(hand_rankings.items())):
         if value:
             analysis = analysis + str(TERM_MAP[key])
             break
+    print(draws)
     if draws["straight_draw"][0]:
         analysis = analysis + "\n玩家顺子听牌，听" + ",".join(map(str, draws["straight_draw"][1]))
     else:
@@ -108,7 +172,13 @@ def fill_analysis(result: tuple) -> str:
         analysis = analysis + "\n玩家同花顺听牌，听" + ",".join(map(str, draws["straight_draw"][1]))
     else:
         analysis += "\n玩家不可能成同花顺"
-    return analysis
+
+    # 这里的tops应该用对手数据做输入
+    tops = get_top_combinations(op_range, op_weight, op_ev, effective_stack=effective_stack, top_n=2)
+    analysis = analysis + "\n需要关注对手的组合：" + str(tops["hands"].tolist())
+
+    with open("llm_agent/analysis.txt", "w") as f:
+        f.write(analysis)
 
 
 def explain(sys_prompt: str, user_prompt: str) -> str:
@@ -121,7 +191,7 @@ def explain(sys_prompt: str, user_prompt: str) -> str:
                 {"role": "user", "content": user_prompt},
             ],
             stream=False,
-            temperature=1.3,
+            temperature=1.0,
             max_tokens=1024,
         )
         return chat_completion.choices[0].message.content
@@ -132,7 +202,7 @@ def explain(sys_prompt: str, user_prompt: str) -> str:
 
 
 def force_correct(content: str) -> str:
-    # TODO: correct terms and examples
+    # TODO: force correct terms and examples
     # How to match regular expressions?
     return content
 
@@ -147,15 +217,13 @@ def main() -> None:
     with open("llm_agent/terms.txt", encoding="utf-8") as f:
         terms = f.read()
 
-    with open("llm_agent/engine_results.json", encoding="utf-8") as f:
-        engine_results = json.load(f)
-        analysis = fill_analysis(process_raw(engine_results))
+    process_raw()
 
-    # 这里query其实应该从engine_results中生成
-    # 所以engine_results里应该包含query中需要的数据，例如位置、玩家手牌等
-    # 范围是否应该选取当前的对手范围？
     with open("llm_agent/query.txt", encoding="utf-8") as f:
         query = f.read()
+
+    with open("llm_agent/analysis.txt", encoding="utf-8") as f:
+        analysis = f.read()
 
     user_prompt = USER_PROMPT.format(
         example=example,

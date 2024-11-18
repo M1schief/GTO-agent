@@ -235,7 +235,7 @@ def check_flush_draw(suit_counts, board_size):
     for count in suit_counts.values():
         if count >= board_size:
             return True, (5 - count)
-    return False
+    return False, None
 
 
 def get_top_combinations(hands, weights, ev, effective_stack, top_n):
