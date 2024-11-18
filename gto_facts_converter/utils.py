@@ -35,6 +35,33 @@ def evaluate_hand(hand, board):
     # 分析点数频率
     pairs, three_of_a_kind, four_of_a_kind = check_counts(value_counts)
     is_full_house, full_house = check_full_house(three_of_a_kind, pairs)
+    sorted_pairs = sorted(pairs, reverse=True)  # 按大小降序排列
+
+    high_card = max(all_ranks)
+    one_pair = pairs[0] if len(pairs) >= 1 else None
+    two_pair = sorted_pairs[:2] if len(pairs) >= 2 else None
+    three = max(three_of_a_kind) if len(three_of_a_kind) >= 1 else None
+    four = max(four_of_a_kind) if len(four_of_a_kind) >= 1 else None
+
+    # 判断最大组合
+    if is_straight_flush:
+        max_comb = 'straight_flush'
+    elif four:
+        max_comb = 'four_of_a_kind'
+    elif is_full_house:
+        max_comb = 'full_house'
+    elif is_flush:
+        max_comb = 'flush'
+    elif is_straight:
+        max_comb = 'straight'
+    elif three:
+        max_comb = 'three_of_a_kind'
+    elif len(pairs) >= 2:
+        max_comb = 'two_pair'
+    elif one_pair:
+        max_comb = 'one_pair'
+    else:
+        max_comb = 'high_card'
 
     # 判断听牌情况
     "Todo: 需要排除已经出现的顺子和同花顺的情况"
@@ -45,15 +72,16 @@ def evaluate_hand(hand, board):
 
     # 返回结果
     hand_rankings = {
-        'high_card': max(all_ranks),
-        'one_pair': len(pairs) == 1,
-        'two_pair': len(pairs) >= 2,
-        'three_of_a_kind': len(three_of_a_kind) >= 1,
-        'straight': is_straight,
-        'flush': is_flush,
+        'max_comb': max_comb,  # 最大组合
+        'high_card': high_card,
+        'one_pair': one_pair,
+        'two_pair': two_pair,
+        'three_of_a_kind': three,
+        'straight': straight_high,
+        'flush': {flush_rank, flush_suit},
         'full_house': full_house,
-        'four_of_a_kind': len(four_of_a_kind) >= 1,
-        'straight_flush': is_straight_flush
+        'four_of_a_kind': four,
+        'straight_flush': straight_flush
     }
 
     draws = {
@@ -63,6 +91,10 @@ def evaluate_hand(hand, board):
     }
 
     return hand_rankings, draws
+
+
+def evaluate_board(board):
+    return None
 
 
 def card_value(rank):
@@ -144,6 +176,7 @@ def check_full_house(three_of_a_kind, pairs):
 
     return False, None
 
+
 def check_straight_draw(values, N=-1):
     # 将 A 视为 1 和 14
     hand_ranks = set(values)
@@ -195,6 +228,7 @@ def check_straight_draw(values, N=-1):
     
     return has_straight_draw, missing_combinations
 
+
 def check_straight_flush_draw(cards):
     # 计算剩余的牌数量
     total_cards = 7  # 2 手牌 + 5 公共牌
@@ -228,11 +262,13 @@ def check_straight_flush_draw(cards):
 
     return has_straight_flush_draw, missing_combinations
 
+
 def check_flush_draw(suit_counts, board_size):
     for count in suit_counts.values():
         if count >= board_size:
             return True, (5 - count)
     return False
+
 
 def get_top_combinations(hands, weights, ev, effective_stack, top_n):
     """
