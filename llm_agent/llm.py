@@ -2,7 +2,6 @@ import sys
 import os
 import argparse
 import time
-import json
 
 import random
 import pandas as pd
@@ -47,7 +46,7 @@ SYSTEM_PROMPT = """你是一个德州扑克游戏中的解释器。"""
 # pylint: disable=line-too-long
 USER_PROMPT = """结合玩家位置、对手位置、玩家手牌、玩家手牌范围、对手手牌范围等信息，你需要通过下面几点对GTO结果中各项行动的原因进行解释：
 1. 分析当前的公共牌面有什么影响
-2. 根据对手在翻前/翻牌/转牌/河牌面上的行动，分析对手的范围可能包括了哪些价值组合，听牌组合
+2. 根据对手的行动，分析对手的范围可能包括了哪些价值组合，听牌组合
 3. 分析玩家手牌的强弱，以及玩家手牌对对手牌力的影响
 
 下面首先会展示几个正确的例子:
@@ -58,9 +57,6 @@ USER_PROMPT = """结合玩家位置、对手位置、玩家手牌、玩家手牌
 
 在举例时，你需要参靠下面的初步分析：
 {analysis}
-
-同时，你需要参考下面的术语字典：
-{terms}
 """
 
 
@@ -127,10 +123,13 @@ def process_raw() -> str:
         player_actions = action_history[0::2]
         op_actions = action_history[1::2]
 
+    # print(player_actions)
+    # print(op_actions)
+
     # game history
     game = f"翻牌面是{board[0]}，{board[1]}，{board[2]}，对手{op_actions[0]}，玩家{player_actions[0]}\n"
     if len(board) >= 4:
-        game += f"转牌面是{board[3]}，对手{op_actions[1]}，玩家{player_actions[1]}\n"
+        game += f"转牌面是{board[3]}，对手{op_actions[1]}\n"
     if len(board) == 5:
         game += f"河牌面是{board[4]}，对手{op_actions[2]}，玩家{player_actions[2]}"
 
@@ -214,10 +213,7 @@ def main() -> None:
     with open("llm_agent/example.txt", encoding="utf-8") as f:
         example = f.read()
 
-    with open("llm_agent/terms.txt", encoding="utf-8") as f:
-        terms = f.read()
-
-    process_raw()
+    # process_raw()
 
     with open("llm_agent/query.txt", encoding="utf-8") as f:
         query = f.read()
@@ -228,7 +224,6 @@ def main() -> None:
     user_prompt = USER_PROMPT.format(
         example=example,
         query=query,
-        terms=terms,
         analysis=analysis,
     )
 

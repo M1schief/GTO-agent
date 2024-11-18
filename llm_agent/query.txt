@@ -2,11 +2,10 @@
 有效筹码量：100BB
 玩家位置：BTN
 对手位置：BB
-玩家手牌：AdKs
+玩家手牌：JdTc
 翻前：单次加注底池
-翻后：翻牌面是As，Ac，Kc，对手Bet 6，玩家Call
-转牌面是8h，对手Bet 10，玩家Call
-河牌面是3h，对手Bet 16，玩家Call
-玩家手牌范围：['AhKs', 'AhKd', 'AdKs', 'AdKh', 'AhQs', 'AhQd', 'AhQc', 'AdQs', 'AdQh', 'AdQc', 'KsQc', 'KhQc', 'KdQc']
-对手手牌范围：['AhKh', 'AdKd', 'KsKh', 'KsKd', 'KhKd', 'KsQs', 'KhQh', 'KdQd']
-GTO的结果：Fold:0.0%, Call:0.0%, Allin 84:100.0%
+翻后：翻牌面是Td，6c，4s，对手Bet 6，玩家Call
+转牌：转牌面是Ah，对手Bet 10
+玩家手牌范围：['AsKs', 'AdKd', 'AcKc', 'AsQs', 'AdQd', 'AcQc', 'AsJs', 'AdJd', 'AcJc', 'AsTs', 'AcTc', 'As9s', 'Ad9d', 'Ac9c', 'As8s', 'Ad8d', 'Ac8c', 'As7s', 'Ad7d', 'Ac7c', 'As6s', 'Ad6d', 'As5s', 'Ad5d', 'Ac5c', 'Ad4d', 'Ac4c', 'As3s', 'Ad3d', 'Ac3c', 'As2s', 'Ad2d', 'Ac2c', 'AsKh', 'AsKd', 'AsKc', 'AdKs', 'AdKh', 'AdKc', 'AcKs', 'AcKh', 'AcKd', 'AsQh', 'AsQd', 'AsQc', 'AdQs', 'AdQh', 'AdQc', 'AcQs', 'AcQh', 'AcQd', 'AsTh', 'AsTc', 'AdTs', 'AdTh', 'AdTc', 'AcTs', 'AcTh', 'As6h', 'As6d', 'Ad6s', 'Ad6h', 'Ac6s', 'Ac6h', 'Ac6d', 'KsKh', 'KsKd', 'KhKd', 'KsKc', 'KhKc', 'KdKc', 'KsQs', 'KhQh', 'KdQd', 'KcQc', 'KsJs', 'KhJh', 'KdJd', 'KcJc', 'KsTs', 'KhTh', 'KcTc', 'Ks9s', 'Kd9d', 'Kc9c', 'Ks8s', 'Kd8d', 'Kc8c', 'Ks7s', 'Kh7h', 'Kd7d', 'Kc7c', 'Ks6s', 'Kh6h', 'Kd6d', 'KsQh', 'KsQd', 'KsQc', 'KhQs', 'KhQd', 'KhQc', 'KdQs', 'KdQh', 'KdQc', 'KcQs', 'KcQh', 'KcQd', 'KsJh', 'KhJs', 'KhJd', 'KhJc', 'KdJh', 'KcJh', 'KsTh', 'KsTc', 'KhTs', 'KhTc', 'KdTs', 'KdTh', 'KdTc', 'KcTs', 'KcTh', 'QsQh', 'QsQd', 'QhQd', 'QsQc', 'QhQc', 'QdQc', 'QsJs', 'QhJh', 'QdJd', 'QcJc', 'QsTs', 'QhTh', 'QcTc', 'Qs9s', 'Qd9d', 'Qc9c', 'Qs8s', 'Qd8d', 'Qc8c', 'QsJh', 'QhJs', 'QhJd', 'QhJc', 'QdJh', 'QcJh', 'QsTh', 'QsTc', 'QhTs', 'QhTc', 'QdTs', 'QdTh', 'QdTc', 'QcTs', 'QcTh', 'JsJh', 'JsJd', 'JhJd', 'JsJc', 'JhJc', 'JdJc', 'JsTs', 'JhTh', 'JcTc', 'Js9s', 'Jd9d', 'Jc9c', 'JsTh', 'JsTc', 'JhTs', 'JhTc', 'JdTs', 'JdTh', 'JdTc', 'JcTs', 'JcTh', 'TsTh', 'TsTc', 'ThTc', 'Ts9s', 'Th9h', 'Tc9c', '9s9h', '9s9d', '9h9d', '9s9c', '9h9c', '9d9c', '9s8s', '9h8h', '9d8d', '9c8c', '8s8h', '8s8d', '8h8d', '8s8c', '8h8c', '8d8c', '8s7s', '8h7h', '8d7d', '8c7c', '7s7h', '7s7d', '7h7d', '7s7c', '7h7c', '7d7c', '7s6s', '7h6h', '7d6d', '6s5s', '6h5h', '6d5d', '5s5h', '5s5d', '5h5d', '5s5c', '5h5c', '5d5c', '5h4h', '5d4d', '5c4c', '3s3h', '3s3d', '3h3d', '3s3c', '3h3c', '3d3c', '2s2h', '2s2d', '2h2d', '2s2c', '2h2c', '2d2c']
+对手手牌范围：['AsAd', 'AsAc', 'AdAc', 'AsKs', 'AdKd', 'AcKc', 'AsQs', 'AdQd', 'AcQc', 'AsJs', 'AdJd', 'AcJc', 'AsTs', 'AcTc', 'As9s', 'Ad9d', 'Ac9c', 'AsKh', 'AsKd', 'AsKc', 'AdKs', 'AdKh', 'AdKc', 'AcKs', 'AcKh', 'AcKd', 'AsQh', 'AsQd', 'AsQc', 'AdQs', 'AdQh', 'AdQc', 'AcQs', 'AcQh', 'AcQd', 'AsJh', 'AsJd', 'AsJc', 'AdJs', 'AdJh', 'AdJc', 'AcJs', 'AcJh', 'AcJd', 'KsKh', 'KsKd', 'KhKd', 'KsKc', 'KhKc', 'KdKc', 'KsQs', 'KhQh', 'KdQd', 'KcQc', 'KsJs', 'KhJh', 'KdJd', 'KcJc', 'QsQh', 'QsQd', 'QhQd', 'QsQc', 'QhQc', 'QdQc', 'JsJh', 'JsJd', 'JhJd', 'JsJc', 'JhJc', 'JdJc', 'TsTh', 'TsTc', 'ThTc', '9s9d', '9s9c', '9d9c', '8s8h', '8s8d', '8h8d', '8s8c', '8h8c', '8d8c', '7s7h', '7s7d', '7h7d', '7s7c', '7h7c', '7d7c', '6s6h', '6s6d', '6h6d']
+GTO的结果：Fold:0.0%, Call:100.0%, Raise 36:0.0%
