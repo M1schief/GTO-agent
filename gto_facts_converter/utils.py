@@ -11,11 +11,11 @@ def evaluate_hand(hand, board):
 
     # 统计点数和花色的频率
     value_counts = get_counts(all_ranks)
-    print(all_suits)
     suit_counts = get_counts(all_suits)
 
     # 判断同花
     is_flush, flush_suit = check_flush(suit_counts)
+    flush_rank = -1
     if is_flush:
         # 获取所有同花花色的牌点数
         flush_ranks = [rank for rank, suit in zip(all_ranks, all_suits) if suit == flush_suit]
@@ -28,6 +28,7 @@ def evaluate_hand(hand, board):
 
     # 判断同花顺
     is_straight_flush = False
+    straight_flush = None
     if is_flush:
         flush_values = [rank for rank, suit in zip(all_ranks, all_suits) if suit == flush_suit]
         is_straight_flush, straight_flush = check_straight(flush_values)
@@ -65,7 +66,7 @@ def evaluate_hand(hand, board):
 
     # 判断听牌情况
     "Todo: 需要排除已经出现的顺子和同花顺的情况"
-    is_straight_draw, straight_draw = check_straight_draw(all_ranks)
+    is_straight_draw, straight_draw = check_straight_draw(all_ranks, "hand")
     if not is_flush:
         is_flush_draw, flush_draw_num, flush_draw_suit, flush_draw_list = check_flush_draw(suit_counts, len(board), all_cards)
     is_straight_flush_draw, straight_flush_draw = check_straight_flush_draw(all_cards)
@@ -78,7 +79,7 @@ def evaluate_hand(hand, board):
         'two_pair': two_pair,
         'three_of_a_kind': three,
         'straight': straight_high,
-        'flush': {flush_rank, flush_suit},
+        'flush': [flush_rank, flush_suit],
         'full_house': full_house,
         'four_of_a_kind': four,
         'straight_flush': straight_flush
@@ -86,7 +87,7 @@ def evaluate_hand(hand, board):
 
     draws = {
         'straight_draw': straight_draw,
-        'flush_draw': {flush_draw_list, flush_draw_suit, flush_draw_num},
+        'flush_draw': [flush_draw_list, flush_draw_suit, flush_draw_num],
         'striaght_flush_draw': straight_flush_draw
     }
 
@@ -105,6 +106,7 @@ def evaluate_board(board):
 
     # 判断同花
     is_flush, flush_suit = check_flush(suit_counts)
+    flush_rank = -1
     if is_flush:
         # 获取所有同花花色的牌点数
         flush_ranks = [rank for rank, suit in zip(all_ranks, all_suits) if suit == flush_suit]
@@ -117,6 +119,7 @@ def evaluate_board(board):
 
     # 判断同花顺
     is_straight_flush = False
+    straight_flush = None
     if is_flush:
         flush_values = [rank for rank, suit in zip(all_ranks, all_suits) if suit == flush_suit]
         is_straight_flush, straight_flush = check_straight(flush_values)
@@ -133,6 +136,7 @@ def evaluate_board(board):
     four = max(four_of_a_kind) if len(four_of_a_kind) >= 1 else None
 
     # 判断最大组合
+    max_comb = ''
     if is_straight_flush:
         max_comb = 'straight_flush'
     elif four:
@@ -160,7 +164,7 @@ def evaluate_board(board):
         'two_pair': two_pair,
         'three_of_a_kind': three,
         'straight': straight_high,
-        'flush': {flush_rank, flush_suit},
+        'flush': [flush_rank, flush_suit],
         'full_house': full_house,
         'four_of_a_kind': four,
         'straight_flush': straight_flush
@@ -168,14 +172,14 @@ def evaluate_board(board):
 
     # 判断听牌情况
     "Todo: 需要排除已经出现的顺子和同花顺的情况"
-    is_straight_draw, straight_draw = check_straight_draw(all_ranks)
+    is_straight_draw, straight_draw = check_straight_draw(all_ranks, "board")
     if not is_flush:
         is_flush_draw, flush_draw_num, flush_draw_suit, flush_draw_list = check_flush_draw(suit_counts, len(board), all_cards)
     is_straight_flush_draw, straight_flush_draw = check_straight_flush_draw(all_cards)
 
     draws = {
         'straight_draw': straight_draw,
-        'flush_draw': {flush_draw_list, flush_draw_suit, flush_draw_num},
+        'flush_draw': [flush_draw_list, flush_draw_suit, flush_draw_num],
         'striaght_flush_draw': straight_flush_draw
     }
 
@@ -265,7 +269,7 @@ def check_full_house(three_of_a_kind, pairs):
 def check_straight_draw(values, mode="hand"):
     # 将 A 视为 1 和 14
     hand_ranks = set(values)
-
+    N = 1
     if 14 in values:
         hand_ranks.add(1)
     
@@ -279,7 +283,7 @@ def check_straight_draw(values, mode="hand"):
         N = total_cards - len(values)
         
     # 如果没有剩余的牌，直接返回 False 和空列表
-    if mode <= 0:
+    if N <= 0:
         return False, None
 
     # 存储结果的列表
@@ -319,6 +323,7 @@ def check_straight_draw(values, mode="hand"):
 
 
 def check_straight_flush_draw(cards, mode="hand"):
+    N = 1
     if mode == "hand":
         # 计算剩余的牌数量
         total_cards = 7  # 2 手牌 + 5 公共牌
