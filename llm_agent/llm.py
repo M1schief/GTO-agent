@@ -34,7 +34,6 @@ QUERY = """
 玩家位置：{player_position}
 对手位置：{op_position}
 玩家手牌：{hand}
-翻前：单次加注底池
 翻后：{game}
 玩家手牌范围：{player_range}
 对手手牌范围：{op_range}
@@ -45,14 +44,11 @@ SYSTEM_PROMPT = """你是一个德州扑克游戏中的解释器。"""
 
 # pylint: disable=line-too-long
 USER_PROMPT = """结合玩家位置、对手位置、玩家手牌、玩家手牌范围、对手手牌范围等信息，你需要通过下面几点对GTO结果中各项行动的原因进行解释：
-1. 分析当前的公共牌面有什么影响
+1. 分析转牌时的公共牌面
 2. 根据对手的行动，分析对手的范围可能包括了哪些价值组合，听牌组合
-3. 分析玩家手牌的强弱，以及玩家手牌对对手牌力的影响
+3. 分析转牌时玩家手牌的强弱，以及玩家手牌对对手牌力的影响
 
-下面首先会展示几个正确的例子:
-{example}
-
-学习完了上面几个例子，请基于下面的局面信息，按照初步分析和术语表，解释GTO结果中各项动作的原因：
+请基于下面的局面信息，按照初步分析，解释GTO结果中各项动作的原因：
 {query}
 
 在举例时，你需要参靠下面的初步分析：
@@ -110,7 +106,8 @@ def process_raw() -> str:
 
     # random a hand and its GTO results
     action_space = [player_data.columns[-2], player_data.columns[-4], player_data.columns[-6]]
-    n = random.randint(0, len(player_data) - 1)
+    # n = random.randint(0, len(player_data) - 1)
+    n = 124
     hand = player_range[n]
     action_probs = [f"{action[:-2]}:{player_data.iloc[n][action]*100}%" for action in action_space]
     gto = ", ".join(action_probs)
@@ -127,11 +124,13 @@ def process_raw() -> str:
     # print(op_actions)
 
     # game history
-    game = f"翻牌面是{board[0]}，{board[1]}，{board[2]}，对手{op_actions[0]}，玩家{player_actions[0]}\n"
+    game = f"翻牌面是{board[0]}，{board[1]}，{board[2]}，对手{op_actions[0]}"
     if len(board) >= 4:
-        game += f"转牌面是{board[3]}，对手{op_actions[1]}\n"
+        game += f"，玩家{player_actions[0]}\n"
+        game += f"转牌面是{board[3]}，{board[0]}，{board[1]}，{board[2]}，对手{op_actions[1]}"
     if len(board) == 5:
-        game += f"河牌面是{board[4]}，对手{op_actions[2]}，玩家{player_actions[2]}"
+        game += f"，玩家{player_actions[1]}\n"
+        game += f"河牌面是，{board[4]}，{board[3]}，{board[0]}，{board[1]}，{board[2]}，对手{op_actions[2]}"
 
     # query preparation
     query = QUERY.format(
@@ -154,27 +153,29 @@ def process_raw() -> str:
     hand_rankings, draws = evaluate_hand(hand, board)
 
     analysis = "玩家已经成牌："
-    for key, value in list(reversed(hand_rankings.items())):
-        if value:
-            analysis = analysis + str(TERM_MAP[key])
-            break
+    analysis = analysis + TERM_MAP[hand_rankings["max_comb"]] + str(hand_rankings[hand_rankings["max_comb"]])
+    print(hand_rankings)
     print(draws)
-    if draws["straight_draw"][0]:
-        analysis = analysis + "\n玩家顺子听牌，听" + ",".join(map(str, draws["straight_draw"][1]))
+    if len(draws["straight_draw"]):
+        analysis = analysis + "\n玩家顺子听牌，听" + ",".join(map(str, draws["straight_draw"]))
     else:
         analysis += "\n玩家不可能成顺子"
     if draws["flush_draw"][0]:
-        analysis = analysis + "\n玩家同花听牌，还需" + str(draws["flush_draw"][1]) + "张"
+        data = draws["flush_draw"]
+        analysis = (
+            analysis + "\n玩家同花听牌差" + str(data[2]) + "张，听" + ", ".join(f"{num}{data[1]}" for num in data[0])
+        )
     else:
         analysis += "\n玩家不可能成同花"
-    if draws["striaght_flush_draw"][0]:
-        analysis = analysis + "\n玩家同花顺听牌，听" + ",".join(map(str, draws["straight_draw"][1]))
+    if len(draws["striaght_flush_draw"]):
+        analysis = analysis + "\n玩家同花顺听牌，听" + ",".join(map(str, draws["straight_flush_draw"]))
     else:
         analysis += "\n玩家不可能成同花顺"
 
     # 这里的tops应该用对手数据做输入
-    tops = get_top_combinations(op_range, op_weight, op_ev, effective_stack=effective_stack, top_n=2)
-    analysis = analysis + "\n需要关注对手的组合：" + str(tops["hands"].tolist())
+    tops = get_top_combinations(op_range, op_weight, op_ev, effective_stack=effective_stack, top_n=5)
+    print(tops)
+    analysis = analysis + "\n需要关注对手的组合：" + str(tops["label"].drop_duplicates().tolist())
 
     with open("llm_agent/analysis.txt", "w") as f:
         f.write(analysis)
@@ -190,7 +191,7 @@ def explain(sys_prompt: str, user_prompt: str) -> str:
                 {"role": "user", "content": user_prompt},
             ],
             stream=False,
-            temperature=1.0,
+            temperature=1.3,
             max_tokens=1024,
         )
         return chat_completion.choices[0].message.content
@@ -210,8 +211,8 @@ def main() -> None:
     """The main function."""
     args = parse_arguments()
 
-    with open("llm_agent/example.txt", encoding="utf-8") as f:
-        example = f.read()
+    # with open("llm_agent/example.txt", encoding="utf-8") as f:
+    #     example = f.read()
 
     # process_raw()
 
@@ -222,7 +223,6 @@ def main() -> None:
         analysis = f.read()
 
     user_prompt = USER_PROMPT.format(
-        example=example,
         query=query,
         analysis=analysis,
     )

@@ -11,11 +11,11 @@ def evaluate_hand(hand, board):
 
     # 统计点数和花色的频率
     value_counts = get_counts(all_ranks)
-    # print(all_suits)
     suit_counts = get_counts(all_suits)
 
     # 判断同花
     is_flush, flush_suit = check_flush(suit_counts)
+    flush_rank = -1
     if is_flush:
         # 获取所有同花花色的牌点数
         flush_ranks = [rank for rank, suit in zip(all_ranks, all_suits) if suit == flush_suit]
@@ -28,6 +28,7 @@ def evaluate_hand(hand, board):
 
     # 判断同花顺
     is_straight_flush = False
+    straight_flush = None
     if is_flush:
         flush_values = [rank for rank, suit in zip(all_ranks, all_suits) if suit == flush_suit]
         is_straight_flush, straight_flush = check_straight(flush_values)
@@ -35,31 +36,155 @@ def evaluate_hand(hand, board):
     # 分析点数频率
     pairs, three_of_a_kind, four_of_a_kind = check_counts(value_counts)
     is_full_house, full_house = check_full_house(three_of_a_kind, pairs)
+    sorted_pairs = sorted(pairs, reverse=True)  # 按大小降序排列
+
+    high_card = max(all_ranks)
+    one_pair = pairs[0] if len(pairs) >= 1 else None
+    two_pair = sorted_pairs[:2] if len(pairs) >= 2 else None
+    three = max(three_of_a_kind) if len(three_of_a_kind) >= 1 else None
+    four = max(four_of_a_kind) if len(four_of_a_kind) >= 1 else None
+
+    # 判断最大组合
+    if is_straight_flush:
+        max_comb = "straight_flush"
+    elif four:
+        max_comb = "four_of_a_kind"
+    elif is_full_house:
+        max_comb = "full_house"
+    elif is_flush:
+        max_comb = "flush"
+    elif is_straight:
+        max_comb = "straight"
+    elif three:
+        max_comb = "three_of_a_kind"
+    elif len(pairs) >= 2:
+        max_comb = "two_pair"
+    elif one_pair:
+        max_comb = "one_pair"
+    else:
+        max_comb = "high_card"
 
     # 判断听牌情况
     "Todo: 需要排除已经出现的顺子和同花顺的情况"
-    is_straight_draw = check_straight_draw(all_ranks)
+    is_straight_draw, straight_draw = check_straight_draw(all_ranks, "hand")
     if not is_flush:
-        is_flush_draw = check_flush_draw(suit_counts, len(board))
-    is_straight_flush_draw = check_straight_flush_draw(all_cards)
+        is_flush_draw, flush_draw_num, flush_draw_suit, flush_draw_list = check_flush_draw(
+            suit_counts, len(board), all_cards
+        )
+    is_straight_flush_draw, straight_flush_draw = check_straight_flush_draw(all_cards)
 
     # 返回结果
     hand_rankings = {
-        "high_card": max(all_ranks),
-        "one_pair": len(pairs) == 1,
-        "two_pair": len(pairs) >= 2,
-        "three_of_a_kind": len(three_of_a_kind) >= 1,
-        "straight": is_straight,
-        "flush": is_flush,
+        "max_comb": max_comb,  # 最大组合
+        "high_card": high_card,
+        "one_pair": one_pair,
+        "two_pair": two_pair,
+        "three_of_a_kind": three,
+        "straight": straight_high,
+        "flush": [flush_rank, flush_suit],
         "full_house": full_house,
-        "four_of_a_kind": len(four_of_a_kind) >= 1,
-        "straight_flush": is_straight_flush,
+        "four_of_a_kind": four,
+        "straight_flush": straight_flush,
     }
 
     draws = {
-        "straight_draw": is_straight_draw,
-        "flush_draw": is_flush_draw,
-        "striaght_flush_draw": is_straight_flush_draw,
+        "straight_draw": straight_draw,
+        "flush_draw": [flush_draw_list, flush_draw_suit, flush_draw_num],
+        "striaght_flush_draw": straight_flush_draw,
+    }
+
+    return hand_rankings, draws
+
+
+def evaluate_board(board):
+    # 合并手牌和公共牌
+    all_ranks = board.ranks
+    all_suits = board.suits
+    all_cards = board.cards
+
+    # 统计点数和花色的频率
+    value_counts = get_counts(all_ranks)
+    suit_counts = get_counts(all_suits)
+
+    # 判断同花
+    is_flush, flush_suit = check_flush(suit_counts)
+    flush_rank = -1
+    if is_flush:
+        # 获取所有同花花色的牌点数
+        flush_ranks = [rank for rank, suit in zip(all_ranks, all_suits) if suit == flush_suit]
+        # 找到最大的牌点数
+        flush_rank = max(flush_ranks)
+        is_flush_draw = False
+
+    # 判断顺子
+    is_straight, straight_high = check_straight(all_ranks)
+
+    # 判断同花顺
+    is_straight_flush = False
+    straight_flush = None
+    if is_flush:
+        flush_values = [rank for rank, suit in zip(all_ranks, all_suits) if suit == flush_suit]
+        is_straight_flush, straight_flush = check_straight(flush_values)
+
+    # 分析点数频率
+    pairs, three_of_a_kind, four_of_a_kind = check_counts(value_counts)
+    is_full_house, full_house = check_full_house(three_of_a_kind, pairs)
+    sorted_pairs = sorted(pairs, reverse=True)  # 按大小降序排列
+
+    high_card = max(all_ranks)
+    one_pair = pairs[0] if len(pairs) >= 1 else None
+    two_pair = sorted_pairs[:2] if len(pairs) >= 2 else None
+    three = max(three_of_a_kind) if len(three_of_a_kind) >= 1 else None
+    four = max(four_of_a_kind) if len(four_of_a_kind) >= 1 else None
+
+    # 判断最大组合
+    max_comb = ""
+    if is_straight_flush:
+        max_comb = "straight_flush"
+    elif four:
+        max_comb = "four_of_a_kind"
+    elif is_full_house:
+        max_comb = "full_house"
+    elif is_flush:
+        max_comb = "flush"
+    elif is_straight:
+        max_comb = "straight"
+    elif three:
+        max_comb = "three_of_a_kind"
+    elif len(pairs) >= 2:
+        max_comb = "two_pair"
+    elif one_pair:
+        max_comb = "one_pair"
+    else:
+        max_comb = "high_card"
+
+    # 返回结果
+    hand_rankings = {
+        "max_comb": max_comb,  # 最大组合
+        "high_card": high_card,
+        "one_pair": one_pair,
+        "two_pair": two_pair,
+        "three_of_a_kind": three,
+        "straight": straight_high,
+        "flush": [flush_rank, flush_suit],
+        "full_house": full_house,
+        "four_of_a_kind": four,
+        "straight_flush": straight_flush,
+    }
+
+    # 判断听牌情况
+    "Todo: 需要排除已经出现的顺子和同花顺的情况"
+    is_straight_draw, straight_draw = check_straight_draw(all_ranks, "board")
+    if not is_flush:
+        is_flush_draw, flush_draw_num, flush_draw_suit, flush_draw_list = check_flush_draw(
+            suit_counts, len(board), all_cards
+        )
+    is_straight_flush_draw, straight_flush_draw = check_straight_flush_draw(all_cards)
+
+    draws = {
+        "straight_draw": straight_draw,
+        "flush_draw": [flush_draw_list, flush_draw_suit, flush_draw_num],
+        "striaght_flush_draw": straight_flush_draw,
     }
 
     return hand_rankings, draws
@@ -145,16 +270,20 @@ def check_full_house(three_of_a_kind, pairs):
     return False, None
 
 
-def check_straight_draw(values, N=-1):
+def check_straight_draw(values, mode="hand"):
     # 将 A 视为 1 和 14
     hand_ranks = set(values)
-
+    N = 1
     if 14 in values:
         hand_ranks.add(1)
 
-    if N == -1:
+    if mode == "hand":
         # 计算剩余的牌数量
         total_cards = 7  # 2 手牌 + 5 公共牌
+        N = total_cards - len(values)
+    elif mode == "board":
+        # 计算剩余的牌数量
+        total_cards = 5
         N = total_cards - len(values)
 
     # 如果没有剩余的牌，直接返回 False 和空列表
@@ -197,13 +326,19 @@ def check_straight_draw(values, N=-1):
     return has_straight_draw, missing_combinations
 
 
-def check_straight_flush_draw(cards):
-    # 计算剩余的牌数量
-    total_cards = 7  # 2 手牌 + 5 公共牌
-    N = total_cards - len(cards)
+def check_straight_flush_draw(cards, mode="hand"):
+    N = 1
+    if mode == "hand":
+        # 计算剩余的牌数量
+        total_cards = 7  # 2 手牌 + 5 公共牌
+        N = total_cards - len(cards)
+    elif mode == "board":
+        # 计算剩余的牌数量
+        total_cards = 5
+        N = total_cards - len(cards)
 
     if N <= 0:
-        return False, []
+        return False, None
 
     # 按花色分类牌
     suits = {}
@@ -231,11 +366,22 @@ def check_straight_flush_draw(cards):
     return has_straight_flush_draw, missing_combinations
 
 
-def check_flush_draw(suit_counts, board_size):
-    for count in suit_counts.values():
-        if count >= board_size:
-            return True, (5 - count)
-    return False, None
+def check_flush_draw(suit_counts, board_size, cards):
+    # 标准扑克牌的数字
+    all_ranks = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}
+
+    # 收集已经出现的花色和数字
+    seen_cards = {"c": set(), "d": set(), "h": set(), "s": set()}  # 各花色的已出现牌
+    for rank, suit in cards:
+        seen_cards[suit].add(rank)
+
+    # 检查是否满足听牌条件
+    for suit, count in suit_counts.items():
+        if count >= board_size:  # 满足听同花的花色
+            missing_cards = all_ranks - seen_cards[suit]  # 未出现的牌
+            return True, (5 - count), suit, list(missing_cards)  # 听牌状态，缺几张，听花色，听哪些牌
+
+    return False, None, None, None  # 不满足听牌
 
 
 def get_top_combinations(hands, weights, ev, effective_stack, top_n):
@@ -252,14 +398,40 @@ def get_top_combinations(hands, weights, ev, effective_stack, top_n):
     # 1. 将输入数据加载为DataFrame
     data = pd.DataFrame({"hands": hands, "weights": weights, "ev": ev})
 
+    # 新增标签列label
+    data["label"] = np.where(
+        data["hands"].str[1] == data["hands"].str[3],
+        data["hands"].str[0] + data["hands"].str[2] + "s",
+        data["hands"].str[0] + data["hands"].str[2] + "o",
+    )
+
     # 2. 对EV进行归一化
     data["ev_scaled"] = data["ev"] / effective_stack
 
     # 3. 计算每个组合到(0, 0)的距离
     data["distance"] = np.sqrt(data["weights"] ** 2 + data["ev_scaled"] ** 2)
 
-    # 4. 按距离排序，取出距离最大的 top_n 个组合
-    top_combinations = data.nlargest(top_n, "distance")
+    # 4. 按距离排序
+    data = data.sort_values(by="distance", ascending=False)
 
-    # 5. 返回hands, weights, 和 ev
-    return top_combinations[["hands", "weights", "ev"]]
+    # 5. 选择前 top_n + 1 个不同 label 的组合（允许重复，但同一label不计入计数）
+    unique_labels = set()
+    top_combinations = []
+
+    for _, row in data.iterrows():
+        label = row["label"]
+        if label not in unique_labels:
+            unique_labels.add(label)
+            top_combinations.append(row)
+            if len(unique_labels) == top_n + 1:
+                break
+        else:
+            top_combinations.append(row)
+
+    # 6. 去掉最后一个组合，确保仅有 top_n 个不同的label
+    if len(unique_labels) > top_n:
+        top_combinations = top_combinations[:-1]
+
+    # 7. 转换为 DataFrame 并返回 hands, weights, ev 和 label
+    top_combinations_df = pd.DataFrame(top_combinations)
+    return top_combinations_df[["hands", "weights", "ev", "label"]]
