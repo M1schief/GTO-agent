@@ -39,10 +39,26 @@ def evaluate_hand(hand, board):
     sorted_pairs = sorted(pairs, reverse=True)  # 按大小降序排列
 
     high_card = max(all_ranks)
-    one_pair = pairs[0] if len(pairs) >= 1 else None
+    # one_pair = pairs[0] if len(pairs) >= 1 else None
     two_pair = sorted_pairs[:2] if len(pairs) >= 2 else None
     three = max(three_of_a_kind) if len(three_of_a_kind) >= 1 else None
     four = max(four_of_a_kind) if len(four_of_a_kind) >= 1 else None
+
+    one_pair = None
+
+    # 获取公共牌中点数的最大值
+    max_board_rank = max(board.ranks)
+
+    # 计算 one_pair
+    if len(pairs) >= 1:
+        pair_rank = pairs[0]  # 形成对子牌的点数
+        if pair_rank > max_board_rank:
+            pair_type = "over_pair"  # 超对
+        elif pair_rank == max_board_rank:
+            pair_type = "top_pair"  # 顶对
+        else:
+            pair_type = "other"  # 其他
+        one_pair = (pair_rank, pair_type)
 
     # 判断最大组合
     if is_straight_flush:
@@ -64,6 +80,11 @@ def evaluate_hand(hand, board):
     else:
         max_comb = "high_card"
 
+    # Initialize variables
+    flush_draw_list = None
+    flush_draw_suit = None
+    flush_draw_num = None
+
     # 判断听牌情况
     "Todo: 需要排除已经出现的顺子和同花顺的情况"
     is_straight_draw, straight_draw = check_straight_draw(all_ranks, "hand")
@@ -72,6 +93,33 @@ def evaluate_hand(hand, board):
             suit_counts, len(board), all_cards
         )
     is_straight_flush_draw, straight_flush_draw = check_straight_flush_draw(all_cards)
+
+    # 输出格式转换
+    high_card = card_value_inverse(high_card)
+    if one_pair:
+        one_pair = (card_value_inverse(one_pair[0]), one_pair[1])  # 对子点数转为字符
+    if two_pair:
+        two_pair = [card_value_inverse(rank) for rank in two_pair]
+    if three:
+        three = card_value_inverse(three)
+    if four:
+        four = card_value_inverse(four)
+    if straight_high:
+        straight_high = card_value_inverse(straight_high)
+    if flush_rank != -1:
+        flush_rank = card_value_inverse(flush_rank)
+    if straight_flush:
+        straight_flush = card_value_inverse(straight_flush)
+    if full_house:
+        full_house = (card_value_inverse(full_house[0]), card_value_inverse(full_house[1]))
+    if straight_draw:
+        straight_draw = [[card_value_inverse(rank) for rank in combo] for combo in straight_draw]
+    if flush_draw_list:
+        flush_draw_list = [card_value_inverse(rank) for rank in flush_draw_list]
+    if straight_flush_draw:
+        straight_flush_draw = [
+            [(card_value_inverse(rank), suit) for rank, suit in combo] for combo in straight_flush_draw
+        ]
 
     # 返回结果
     hand_rankings = {
@@ -90,7 +138,7 @@ def evaluate_hand(hand, board):
     draws = {
         "straight_draw": straight_draw,
         "flush_draw": [flush_draw_list, flush_draw_suit, flush_draw_num],
-        "striaght_flush_draw": straight_flush_draw,
+        "straight_flush_draw": straight_flush_draw,
     }
 
     return hand_rankings, draws
@@ -137,8 +185,23 @@ def evaluate_board(board):
     three = max(three_of_a_kind) if len(three_of_a_kind) >= 1 else None
     four = max(four_of_a_kind) if len(four_of_a_kind) >= 1 else None
 
+    # one_pair = None
+
+    # # 获取公共牌中点数的最大值
+    # max_board_rank = max(board.ranks)
+
+    # # 计算 one_pair
+    # if len(pairs) >= 1:
+    #     pair_rank = pairs[0]  # 形成对子牌的点数
+    #     if pair_rank > max_board_rank:
+    #         pair_type = "over_pair"  # 超对
+    #     elif pair_rank == max_board_rank:
+    #         pair_type = "top_pair"  # 顶对
+    #     else:
+    #         pair_type = "other"  # 其他
+    #     one_pair = (pair_rank, pair_type)
+
     # 判断最大组合
-    max_comb = ""
     if is_straight_flush:
         max_comb = "straight_flush"
     elif four:
@@ -158,6 +221,47 @@ def evaluate_board(board):
     else:
         max_comb = "high_card"
 
+    # Initialize variables
+    flush_draw_list = None
+    flush_draw_suit = None
+    flush_draw_num = None
+
+    # 判断听牌情况
+    "Todo: 需要排除已经出现的顺子和同花顺的情况"
+    is_straight_draw, straight_draw = check_straight_draw(all_ranks, "hand")
+    if not is_flush:
+        is_flush_draw, flush_draw_num, flush_draw_suit, flush_draw_list = check_flush_draw(
+            suit_counts, len(board), all_cards
+        )
+    is_straight_flush_draw, straight_flush_draw = check_straight_flush_draw(all_cards)
+
+    # 输出格式转换
+    high_card = card_value_inverse(high_card)
+    if one_pair:
+        one_pair = (card_value_inverse(one_pair[0]), one_pair[1])  # 对子点数转为字符
+    if two_pair:
+        two_pair = [card_value_inverse(rank) for rank in two_pair]
+    if three:
+        three = card_value_inverse(three)
+    if four:
+        four = card_value_inverse(four)
+    if straight_high:
+        straight_high = card_value_inverse(straight_high)
+    if flush_rank != -1:
+        flush_rank = card_value_inverse(flush_rank)
+    if straight_flush:
+        straight_flush = card_value_inverse(straight_flush)
+    if full_house:
+        full_house = (card_value_inverse(full_house[0]), card_value_inverse(full_house[1]))
+    if straight_draw:
+        straight_draw = [[card_value_inverse(rank) for rank in combo] for combo in straight_draw]
+    if flush_draw_list:
+        flush_draw_list = [card_value_inverse(rank) for rank in flush_draw_list]
+    if straight_flush_draw:
+        straight_flush_draw = [
+            [(card_value_inverse(rank), suit) for rank, suit in combo] for combo in straight_flush_draw
+        ]
+
     # 返回结果
     hand_rankings = {
         "max_comb": max_comb,  # 最大组合
@@ -172,22 +276,67 @@ def evaluate_board(board):
         "straight_flush": straight_flush,
     }
 
-    # 判断听牌情况
-    "Todo: 需要排除已经出现的顺子和同花顺的情况"
-    is_straight_draw, straight_draw = check_straight_draw(all_ranks, "board")
-    if not is_flush:
-        is_flush_draw, flush_draw_num, flush_draw_suit, flush_draw_list = check_flush_draw(
-            suit_counts, len(board), all_cards
-        )
-    is_straight_flush_draw, straight_flush_draw = check_straight_flush_draw(all_cards)
-
     draws = {
         "straight_draw": straight_draw,
         "flush_draw": [flush_draw_list, flush_draw_suit, flush_draw_num],
-        "striaght_flush_draw": straight_flush_draw,
+        "straight_flush_draw": straight_flush_draw,
     }
 
     return hand_rankings, draws
+
+
+def evaluate_hand_with_board_filter(hand, board):
+    """
+    结合 evaluate_hand 和 evaluate_board 的结果，过滤掉 board 的听牌
+    """
+    # 调用 evaluate_hand 获取手牌+公共牌的结果
+    hand_rankings, hand_draws = evaluate_hand(hand, board)
+
+    # 调用 evaluate_board 获取 board 自身的听牌情况
+    board_rankings, board_draws = evaluate_board(board)
+
+    # 过滤 hand_draws 中与 board_draws 重叠的听牌
+    filtered_draws = {}
+    for key in hand_draws:
+        # 遍历每种听牌类型
+        if key in board_draws:
+            # 处理 flush_draw 的去重逻辑
+            if key == "flush_draw":
+                hand_flush_list, hand_suit, hand_num = hand_draws[key]
+                board_flush_list, board_suit, board_num = board_draws[key]
+
+                # 如果花色和缺牌数一致，清空整个 flush_draw
+                if hand_suit == board_suit and hand_num == board_num:
+                    filtered_draws[key] = [None, None, None]  # 清空整个 flush_draw
+                else:
+                    filtered_draws[key] = hand_draws[key]  # 保留其他内容
+
+            # 处理 straight_draw 的去重逻辑
+            elif key == "straight_draw":
+                hand_combinations = hand_draws[key] or []
+                board_combinations = board_draws[key] or []
+
+                # 使用集合过滤出不在 board 的听牌组合
+                filtered_combinations = [combo for combo in hand_combinations if combo not in board_combinations]
+                filtered_draws[key] = filtered_combinations if filtered_combinations else None  # 返回空列表
+
+            # 处理 straight_flush_draw 的去重逻辑
+            elif key == "straight_flush_draw":
+                hand_combinations = hand_draws[key] or []
+                board_combinations = board_draws[key] or []
+
+                # 使用集合过滤出不在 board 的听牌组合
+                filtered_combinations = [combo for combo in hand_combinations if combo not in board_combinations]
+                filtered_draws[key] = filtered_combinations if filtered_combinations else None  # 返回空列表
+
+            else:
+                # 保留其他听牌
+                filtered_draws[key] = hand_draws[key]
+        else:
+            # 不在 board_draws 中，直接保留
+            filtered_draws[key] = hand_draws[key]
+
+    return hand_rankings, filtered_draws
 
 
 def card_value(rank):
@@ -203,6 +352,21 @@ def card_value(rank):
         return 10
     else:
         return int(rank)
+
+
+def card_value_inverse(value):
+    if value == 14:
+        return "A"
+    elif value == 13:
+        return "K"
+    elif value == 12:
+        return "Q"
+    elif value == 11:
+        return "J"
+    elif value == 10:
+        return "T"
+    else:
+        return str(value)
 
 
 def get_counts(items):
@@ -354,7 +518,7 @@ def check_straight_flush_draw(cards, mode="hand"):
         if num_cards_same_suit + N < 5:
             continue  # 不可能形成同花，检查下一个花色
         # 调用 check_straight_draw 函数
-        has_draw, missing_cards = check_straight_draw(values, N)
+        has_draw, missing_cards = check_straight_draw(values, mode)
 
         if has_draw:
             has_straight_flush_draw = True
