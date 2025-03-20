@@ -339,6 +339,32 @@ def evaluate_hand_with_board_filter(hand, board):
     return hand_rankings, filtered_draws
 
 
+def evaluate_group_with_board_filter(grouped_data, board):
+    """
+    计算分组结果中手牌和公共牌的结果，并根据 board 进行滥选
+    :param grouped_data: [[hand1, hand2], [hand3], ...] 格式的分组手牌
+    :param board: 公共牌
+    :return: 过滤后的分组结果，格式与 grouped_data 一致
+    """
+    filtered_group = []
+
+    for group in grouped_data:
+        filtered_subgroup = []
+        for hand in group:
+            hand_instance = Hand(hand)  # 将字符串应用为 Hand 类
+            hand_rankings, filtered_draws = evaluate_hand_with_board_filter(hand_instance, board)
+
+            # 只保留 max_comb 和其对应的结构
+            max_comb = hand_rankings["max_comb"]
+            value = hand_rankings.get(max_comb, None)
+            processed_rankings = {"max_comb": max_comb, "value": value}
+
+            filtered_subgroup.append((hand, processed_rankings, filtered_draws))
+        filtered_group.append(filtered_subgroup)
+
+    return filtered_group
+
+
 def card_value(rank):
     if rank == "A":
         return 14  # A 可以作为最大点数
@@ -572,13 +598,21 @@ def get_top_combinations(hands, weights, ev, effective_stack, top_n):
     # 2. 对EV进行归一化
     data["ev_scaled"] = data["ev"] / effective_stack
 
-    # 3. 计算每个组合到(0, 0)的距离
-    data["distance"] = np.sqrt(data["weights"] ** 2 + data["ev_scaled"] ** 2)
+    # 3. 对weights进行归一化（min-max归一化）
+    weight_max = data["weights"].max()
+    weight_min = data["weights"].min()
+    if weight_max != weight_min:  # 避免除以零
+        data["weights_scaled"] = (data["weights"] - weight_min) / (weight_max - weight_min)
+    else:
+        data["weights_scaled"] = data["weights"]  # 如果最大值等于最小值，直接使用原值
 
-    # 4. 按距离排序
+    # 4. 计算每个组合到(0, 0)的距离
+    data["distance"] = np.sqrt(data["weights_scaled"] ** 2 + data["ev_scaled"] ** 2)
+
+    # 5. 按距离排序
     data = data.sort_values(by="distance", ascending=False)
 
-    # 5. 选择前 top_n + 1 个不同 label 的组合（允许重复，但同一label不计入计数）
+    # 6. 选择前 top_n + 1 个不同 label 的组合（允许重复，但同一label不计入计数）
     unique_labels = set()
     top_combinations = []
 
@@ -592,10 +626,31 @@ def get_top_combinations(hands, weights, ev, effective_stack, top_n):
         else:
             top_combinations.append(row)
 
-    # 6. 去掉最后一个组合，确保仅有 top_n 个不同的label
+    # 7. 去掉最后一个组合，确保仅有 top_n 个不同的label
     if len(unique_labels) > top_n:
         top_combinations = top_combinations[:-1]
 
-    # 7. 转换为 DataFrame 并返回 hands, weights, ev 和 label
+    # 8. 转换为 DataFrame 并返回 hands, weights, ev 和 label
     top_combinations_df = pd.DataFrame(top_combinations)
-    return top_combinations_df[["hands", "weights", "ev", "label"]]
+
+    # 9. 根据label对组合进行分组
+    grouped_data = []
+    for label, group in top_combinations_df.groupby("label", sort=False):
+        group = group.sort_values(by="distance", ascending=False)
+        distances = group["distance"].values
+
+        # 检查距离并分组
+        split_indices = [0]
+        for i in range(len(distances) - 1):
+            if distances[i] - distances[i + 1] > 0.04:
+                split_indices.append(i + 1)
+
+        split_indices.append(len(distances))
+
+        # 分组后将分组添加到结果集合
+        for i in range(len(split_indices) - 1):
+            start, end = split_indices[i], split_indices[i + 1]
+            grouped_data.append(group.iloc[start:end]["hands"].tolist())
+
+    # 10. 返回分组结果
+    return top_combinations_df[["hands", "weights", "ev", "label", "distance"]], grouped_data
