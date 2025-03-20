@@ -288,8 +288,8 @@ def main() -> None:
     """The main function."""
     args = parse_arguments()
 
-    # user_data = extract_poker_info()
-    user_data = json.load(open("game_info.json"))
+    user_data = extract_poker_info()
+    # user_data = json.load(open("game_info.json"))
     prepare_prompt(user_data)
 
     with open("llm_agent/prompt.txt", encoding="utf-8") as f:
