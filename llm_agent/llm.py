@@ -4,6 +4,7 @@ import argparse
 import time
 import json
 import requests
+import copy
 
 import openai
 from google import genai
@@ -112,6 +113,8 @@ def prepare_analysis2(op_range: list, op_weight: list, op_ev: list, board: list,
     tops = get_top_combinations(op_range, op_weight, op_ev, effective_stack=effective_stack, top_n=top_n)
     hands_label = tops[0]["label"].drop_duplicates().tolist()
     hands_group = tops[1]
+    print(board)
+    print(hands_group)
 
     assert len(hands_label) == top_n
 
@@ -119,7 +122,15 @@ def prepare_analysis2(op_range: list, op_weight: list, op_ev: list, board: list,
     for i in range(top_n):
         hand = hands_group[i][0]
         op_hand_rankings, op_draws = evaluate_hand_with_board_filter(Hand([hand[:2], hand[2:]]), Board(board))
-        analysis2 = analysis2 + hands_label[i] + "，" + TERM_MAP[op_hand_rankings["max_comb"]] + "\n"
+        analysis2 = analysis2 + hands_label[i] + "，" + TERM_MAP[op_hand_rankings["max_comb"]]
+        if op_draws["straight_flush_draw"]:
+            analysis2 += "，同花顺听牌"
+        else:
+            if op_draws["straight_draw"]:
+                analysis2 += "，顺子听牌"
+            if op_draws["flush_draw"][0]:
+                analysis2 += "，同花听牌"
+        analysis2 += "\n"
     return analysis2
 
 
@@ -171,14 +182,22 @@ def prepare_prompt(user_data: dict) -> str:
     effective_stack = 100
     player_id = "ip"
 
+    # contruct rust API inputs
+    actions = copy.deepcopy(user_data["actions"])
+    if len(actions) >= 4:
+        actions.insert(4, "river")
+        actions.insert(2, "turn")
+    elif len(actions) >= 2:
+        actions.insert(2, "turn")
+
     data = {
         "user_spt": user_data["user_position"],
         "opponent_spt": user_data["opponent_position"],
         "user_hand": user_data["user_hand"],
         "flop": user_data["flop"],
-        "turn": user_data["turn"],
-        "river": user_data["river"],
-        "actions": user_data["actions"],
+        "turn": user_data["turn"] if user_data["turn"] else "",
+        "river": user_data["river"] if user_data["river"] else "",
+        "actions": actions,
     }
     response = requests.post("http://127.0.0.1:8080/demo/getGto", json=data)
     response = response.json()
@@ -189,7 +208,7 @@ def prepare_prompt(user_data: dict) -> str:
 
     # game history
     assert player_id == "ip"
-    action_history = data["actions"]
+    action_history = user_data["actions"]
     game = f"翻牌面是{board[0]}，{board[1]}，{board[2]}，对手{action_history[0]}"
     if len(board) >= 4:
         game += f"，玩家{action_history[1]}\n"
@@ -203,7 +222,6 @@ def prepare_prompt(user_data: dict) -> str:
     gto = ", ".join([f"{action_space[n]}:{action_probs[n]*100}%" for n in range(len(action_space))])
 
     nonzero_index = [i for i, x in enumerate(response["opponent_hands_weights"]) if x > 1e-4]
-    print(len(nonzero_index))
 
     # prepare analysis
     analysis1 = prepare_analysis1(board)
@@ -246,7 +264,7 @@ def explain(sys_prompt: str, user_prompt: str, model: str) -> str:
         client = openai.OpenAI(base_url="https://api.deepseek.com")
         try:
             chat_completion = client.chat.completions.create(
-                model="deepseek-reasoner",
+                model="deepseek-chat",
                 messages=[
                     {"role": "system", "content": sys_prompt},
                     {"role": "user", "content": user_prompt},

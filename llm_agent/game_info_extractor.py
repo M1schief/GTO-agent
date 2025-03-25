@@ -6,9 +6,7 @@ import openai
 
 
 def extract_poker_info() -> Dict[str, Any]:
-    input_text = input(
-        "请输入当前信息，请至少包含双方位置、玩家手牌、公共牌面和双方动作："
-    )
+    input_text = input("请输入当前信息，请至少包含双方位置、玩家手牌、公共牌面和双方动作：")
 
     game_info_empty = {
         "user_position": "",
@@ -27,7 +25,7 @@ def extract_poker_info() -> Dict[str, Any]:
     - Flop cards (3 cards)
     - Turn card (1 card, optional)
     - River card (1 card, optional)
-    - Actions (list of actions like Bet, Call, Raise, etc.)
+    - All Actions (list of actions in forms like Bet(6), Bet(10), Call, etc.)
 
     Input text: {input_text}
 
@@ -63,6 +61,7 @@ def extract_poker_info() -> Dict[str, Any]:
         match = re.search(r"\{.*\}", result, re.DOTALL)
         if match:
             game_info = json.loads(match.group(0))
+            json.dump(game_info, open("game_info.json", "w"))
             return game_info
         else:
             return "Error extracting poker information: {str(e)}"
