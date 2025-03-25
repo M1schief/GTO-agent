@@ -1,0 +1,40 @@
+Based on information such as player position, opponent position, player’s hand, player’s hand range, and opponent’s hand range, you need to explain the reasons behind each action in the GTO result through the following points:
+1. Analyzing the dryness and connectivity of the board:
+Flop: Td, 6c, 4s
+Turn: Ah, Td, 6c, 4s
+No straight possibilities on the turn.
+No flush possibilities on the turn.
+2. Analyzing the opponent's range based on their actions. The opponent’s range may include the following value hands and drawing hands:
+Value hands to consider:
+ATs (top two pair)
+66o (set)
+AAo (top set)
+TTo (set)
+Draw hands to consider:
+KQs (gutshot straight draw)
+3. Evaluating the strength of the player’s hand at each stage and its impact on the opponent’s hand strength
+On the flop:
+The player has a high-card hand (J high).
+The player has a straight draw, needing 78, 8Q, or QK to complete.
+The player has a flush draw, needing two of the following cards: 3d, Ad, 8d, 5d, 4d, 10d, 6d, 7d, Kd, 2d, Qd.
+The player has a straight flush draw, needing 7d8d, 8dQd, or QdKd.
+
+On the turn:
+The player has improved to a high-card hand (A high).
+The player can no longer make a straight.
+The player can no longer make a flush.
+
+Based on the following game scenario, explain the reasons for the GTO actions according to the preliminary analysis above:
+Effective stack size: 100BB
+Player position: BTN
+Opponent position: BB
+Player’s hand: Jd9d
+Flop: Td, 6c, 4s
+Opponent bets 6, Player calls.
+Turn: Ah, Td, 6c, 4s
+Opponent bets 10.
+Player’s hand range:
+['AsKs', 'AdKd', 'AcKc', 'AsQs', 'AdQd', 'AcQc', 'AsJs', 'AdJd', 'AcJc', 'AsTs', 'AcTc', 'As9s', 'Ad9d', 'Ac9c', 'As8s', 'Ad8d', 'Ac8c', 'As7s', 'Ad7d', 'Ac7c', 'As6s', 'Ad6d', 'As5s', 'Ad5d', 'Ac5c', 'Ad4d', 'Ac4c', 'As3s', 'Ad3d', 'Ac3c', 'As2s', 'Ad2d', 'Ac2c', 'AsKh', 'AsKd', 'AsKc', 'AdKs', 'AdKh', 'AdKc', 'AcKs', 'AcKh', 'AcKd', 'AsQh', 'AsQd', 'AsQc', 'AdQs', 'AdQh', 'AdQc', 'AcQs', 'AcQh', 'AcQd', 'AsTh', 'AsTc', 'AdTs', 'AdTh', 'AdTc', 'AcTs', 'AcTh', 'As6h', 'As6d', 'Ad6s', 'Ad6h', 'Ac6s', 'Ac6h', 'Ac6d', 'KsKh', 'KsKd', 'KhKd', 'KsKc', 'KhKc', 'KdKc', 'KsQs', 'KhQh', 'KdQd', 'KcQc', 'KsJs', 'KhJh', 'KdJd', 'KcJc', 'KsTs', 'KhTh', 'KcTc', 'Ks9s', 'Kd9d', 'Kc9c', 'Ks8s', 'Kd8d', 'Kc8c', 'Ks7s', 'Kh7h', 'Kd7d', 'Kc7c', 'Ks6s', 'Kh6h', 'Kd6d', 'KsQh', 'KsQd', 'KsQc', 'KhQs', 'KhQd', 'KhQc', 'KdQs', 'KdQh', 'KdQc', 'KcQs', 'KcQh', 'KcQd', 'KsJh', 'KhJs', 'KhJd', 'KhJc', 'KdJh', 'KcJh', 'KsTh', 'KsTc', 'KhTs', 'KhTc', 'KdTs', 'KdTh', 'KdTc', 'KcTs', 'KcTh', 'QsQh', 'QsQd', 'QhQd', 'QsQc', 'QhQc', 'QdQc', 'QsJs', 'QhJh', 'QdJd', 'QcJc', 'QsTs', 'QhTh', 'QcTc', 'Qs9s', 'Qd9d', 'Qc9c', 'Qs8s', 'Qd8d', 'Qc8c', 'QsJh', 'QhJs', 'QhJd', 'QhJc', 'QdJh', 'QcJh', 'QsTh', 'QsTc', 'QhTs', 'QhTc', 'QdTs', 'QdTh', 'QdTc', 'QcTs', 'QcTh', 'JsJh', 'JsJd', 'JhJd', 'JsJc', 'JhJc', 'JdJc', 'JsTs', 'JhTh', 'JcTc', 'Js9s', 'Jd9d', 'Jc9c', 'JsTh', 'JsTc', 'JhTs', 'JhTc', 'JdTs', 'JdTh', 'JdTc', 'JcTs', 'JcTh', 'TsTh', 'TsTc', 'ThTc', 'Ts9s', 'Th9h', 'Tc9c', '9s9h', '9s9d', '9h9d', '9s9c', '9h9c', '9d9c', '9s8s', '9h8h', '9d8d', '9c8c', '8s8h', '8s8d', '8h8d', '8s8c', '8h8c', '8d8c', '8s7s', '8h7h', '8d7d', '8c7c', '7s7h', '7s7d', '7h7d', '7s7c', '7h7c', '7d7c', '7s6s', '7h6h', '7d6d', '6s5s', '6h5h', '6d5d', '5s5h', '5s5d', '5h5d', '5s5c', '5h5c', '5d5c', '5h4h', '5d4d', '5c4c', '3s3h', '3s3d', '3h3d', '3s3c', '3h3c', '3d3c', '2s2h', '2s2d', '2h2d', '2s2c', '2h2c', '2d2c']
+Opponent’s hand range:
+['AsAd', 'AsAc', 'AdAc', 'AsKs', 'AdKd', 'AcKc', 'AsQs', 'AdQd', 'AcQc', 'AsJs', 'AdJd', 'AcJc', 'AsTs', 'AcTc', 'As9s', 'Ad9d', 'Ac9c', 'AsKh', 'AsKd', 'AsKc', 'AdKs', 'AdKh', 'AdKc', 'AcKs', 'AcKh', 'AcKd', 'AsQh', 'AsQd', 'AsQc', 'AdQs', 'AdQh', 'AdQc', 'AcQs', 'AcQh', 'AcQd', 'AsJh', 'AsJd', 'AsJc', 'AdJs', 'AdJh', 'AdJc', 'AcJs', 'AcJh', 'AcJd', 'KsKh', 'KsKd', 'KhKd', 'KsKc', 'KhKc', 'KdKc', 'KsQs', 'KhQh', 'KdQd', 'KcQc', 'KsJs', 'KhJh', 'KdJd', 'KcJc', 'QsQh', 'QsQd', 'QhQd', 'QsQc', 'QhQc', 'QdQc', 'JsJh', 'JsJd', 'JhJd', 'JsJc', 'JhJc', 'JdJc', 'TsTh', 'TsTc', 'ThTc', '9s9d', '9s9c', '9d9c', '8s8h', '8s8d', '8h8d', '8s8c', '8h8c', '8d8c', '7s7h', '7s7d', '7h7d', '7s7c', '7h7c', '7d7c', '6s6h', '6s6d', '6h6d']
+GTO Result: Raise 36:0.0%, Call:0.0%, Fold:100.0%

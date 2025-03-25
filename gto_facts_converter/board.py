@@ -1,4 +1,4 @@
-from utils import card_value
+from .utils import card_value
 
 
 class Board:
@@ -12,8 +12,8 @@ class Board:
         if not isinstance(cards, list) or not (3 <= len(cards) <= 5):
             raise ValueError("必须提供三至五张牌的列表")
 
-        valid_ranks = ['A', 'K', 'Q', 'J', 'T'] + [str(n) for n in range(2, 10)]
-        valid_suits = ['h', 'd', 's', 'c']
+        valid_ranks = ["A", "K", "Q", "J", "T"] + [str(n) for n in range(2, 10)]
+        valid_suits = ["h", "d", "s", "c"]
 
         # 解析输入的牌
         parsed_cards = []

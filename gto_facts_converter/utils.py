@@ -39,56 +39,106 @@ def evaluate_hand(hand, board):
     sorted_pairs = sorted(pairs, reverse=True)  # 按大小降序排列
 
     high_card = max(all_ranks)
-    one_pair = pairs[0] if len(pairs) >= 1 else None
+    # one_pair = pairs[0] if len(pairs) >= 1 else None
     two_pair = sorted_pairs[:2] if len(pairs) >= 2 else None
     three = max(three_of_a_kind) if len(three_of_a_kind) >= 1 else None
     four = max(four_of_a_kind) if len(four_of_a_kind) >= 1 else None
 
+    one_pair = None
+
+    # 获取公共牌中点数的最大值
+    max_board_rank = max(board.ranks)
+
+    # 计算 one_pair
+    if len(pairs) >= 1:
+        pair_rank = pairs[0]  # 形成对子牌的点数
+        if pair_rank > max_board_rank:
+            pair_type = "over_pair"  # 超对
+        elif pair_rank == max_board_rank:
+            pair_type = "top_pair"  # 顶对
+        else:
+            pair_type = "other"  # 其他
+        one_pair = (pair_rank, pair_type)
+
     # 判断最大组合
     if is_straight_flush:
-        max_comb = 'straight_flush'
+        max_comb = "straight_flush"
     elif four:
-        max_comb = 'four_of_a_kind'
+        max_comb = "four_of_a_kind"
     elif is_full_house:
-        max_comb = 'full_house'
+        max_comb = "full_house"
     elif is_flush:
-        max_comb = 'flush'
+        max_comb = "flush"
     elif is_straight:
-        max_comb = 'straight'
+        max_comb = "straight"
     elif three:
-        max_comb = 'three_of_a_kind'
+        max_comb = "three_of_a_kind"
     elif len(pairs) >= 2:
-        max_comb = 'two_pair'
+        max_comb = "two_pair"
     elif one_pair:
-        max_comb = 'one_pair'
+        max_comb = "one_pair"
     else:
-        max_comb = 'high_card'
+        max_comb = "high_card"
+
+    # Initialize variables
+    flush_draw_list = None
+    flush_draw_suit = None
+    flush_draw_num = None
 
     # 判断听牌情况
     "Todo: 需要排除已经出现的顺子和同花顺的情况"
     is_straight_draw, straight_draw = check_straight_draw(all_ranks, "hand")
     if not is_flush:
-        is_flush_draw, flush_draw_num, flush_draw_suit, flush_draw_list = check_flush_draw(suit_counts, len(board), all_cards)
+        is_flush_draw, flush_draw_num, flush_draw_suit, flush_draw_list = check_flush_draw(
+            suit_counts, len(board), all_cards
+        )
     is_straight_flush_draw, straight_flush_draw = check_straight_flush_draw(all_cards)
+
+    # 输出格式转换
+    high_card = card_value_inverse(high_card)
+    if one_pair:
+        one_pair = (card_value_inverse(one_pair[0]), one_pair[1])  # 对子点数转为字符
+    if two_pair:
+        two_pair = [card_value_inverse(rank) for rank in two_pair]
+    if three:
+        three = card_value_inverse(three)
+    if four:
+        four = card_value_inverse(four)
+    if straight_high:
+        straight_high = card_value_inverse(straight_high)
+    if flush_rank != -1:
+        flush_rank = card_value_inverse(flush_rank)
+    if straight_flush:
+        straight_flush = card_value_inverse(straight_flush)
+    if full_house:
+        full_house = (card_value_inverse(full_house[0]), card_value_inverse(full_house[1]))
+    if straight_draw:
+        straight_draw = [[card_value_inverse(rank) for rank in combo] for combo in straight_draw]
+    if flush_draw_list:
+        flush_draw_list = [card_value_inverse(rank) for rank in flush_draw_list]
+    if straight_flush_draw:
+        straight_flush_draw = [
+            [(card_value_inverse(rank), suit) for rank, suit in combo] for combo in straight_flush_draw
+        ]
 
     # 返回结果
     hand_rankings = {
-        'max_comb': max_comb,  # 最大组合
-        'high_card': high_card,
-        'one_pair': one_pair,
-        'two_pair': two_pair,
-        'three_of_a_kind': three,
-        'straight': straight_high,
-        'flush': [flush_rank, flush_suit],
-        'full_house': full_house,
-        'four_of_a_kind': four,
-        'straight_flush': straight_flush
+        "max_comb": max_comb,  # 最大组合
+        "high_card": high_card,
+        "one_pair": one_pair,
+        "two_pair": two_pair,
+        "three_of_a_kind": three,
+        "straight": straight_high,
+        "flush": [flush_rank, flush_suit],
+        "full_house": full_house,
+        "four_of_a_kind": four,
+        "straight_flush": straight_flush,
     }
 
     draws = {
-        'straight_draw': straight_draw,
-        'flush_draw': [flush_draw_list, flush_draw_suit, flush_draw_num],
-        'striaght_flush_draw': straight_flush_draw
+        "straight_draw": straight_draw,
+        "flush_draw": [flush_draw_list, flush_draw_suit, flush_draw_num],
+        "straight_flush_draw": straight_flush_draw,
     }
 
     return hand_rankings, draws
@@ -135,70 +185,214 @@ def evaluate_board(board):
     three = max(three_of_a_kind) if len(three_of_a_kind) >= 1 else None
     four = max(four_of_a_kind) if len(four_of_a_kind) >= 1 else None
 
-    # 判断最大组合
-    max_comb = ''
-    if is_straight_flush:
-        max_comb = 'straight_flush'
-    elif four:
-        max_comb = 'four_of_a_kind'
-    elif is_full_house:
-        max_comb = 'full_house'
-    elif is_flush:
-        max_comb = 'flush'
-    elif is_straight:
-        max_comb = 'straight'
-    elif three:
-        max_comb = 'three_of_a_kind'
-    elif len(pairs) >= 2:
-        max_comb = 'two_pair'
-    elif one_pair:
-        max_comb = 'one_pair'
-    else:
-        max_comb = 'high_card'
+    # one_pair = None
 
-    # 返回结果
-    hand_rankings = {
-        'max_comb': max_comb,  # 最大组合
-        'high_card': high_card,
-        'one_pair': one_pair,
-        'two_pair': two_pair,
-        'three_of_a_kind': three,
-        'straight': straight_high,
-        'flush': [flush_rank, flush_suit],
-        'full_house': full_house,
-        'four_of_a_kind': four,
-        'straight_flush': straight_flush
-    }
+    # # 获取公共牌中点数的最大值
+    # max_board_rank = max(board.ranks)
+
+    # # 计算 one_pair
+    # if len(pairs) >= 1:
+    #     pair_rank = pairs[0]  # 形成对子牌的点数
+    #     if pair_rank > max_board_rank:
+    #         pair_type = "over_pair"  # 超对
+    #     elif pair_rank == max_board_rank:
+    #         pair_type = "top_pair"  # 顶对
+    #     else:
+    #         pair_type = "other"  # 其他
+    #     one_pair = (pair_rank, pair_type)
+
+    # 判断最大组合
+    if is_straight_flush:
+        max_comb = "straight_flush"
+    elif four:
+        max_comb = "four_of_a_kind"
+    elif is_full_house:
+        max_comb = "full_house"
+    elif is_flush:
+        max_comb = "flush"
+    elif is_straight:
+        max_comb = "straight"
+    elif three:
+        max_comb = "three_of_a_kind"
+    elif len(pairs) >= 2:
+        max_comb = "two_pair"
+    elif one_pair:
+        max_comb = "one_pair"
+    else:
+        max_comb = "high_card"
+
+    # Initialize variables
+    flush_draw_list = None
+    flush_draw_suit = None
+    flush_draw_num = None
 
     # 判断听牌情况
     "Todo: 需要排除已经出现的顺子和同花顺的情况"
-    is_straight_draw, straight_draw = check_straight_draw(all_ranks, "board")
+    is_straight_draw, straight_draw = check_straight_draw(all_ranks, "hand")
     if not is_flush:
-        is_flush_draw, flush_draw_num, flush_draw_suit, flush_draw_list = check_flush_draw(suit_counts, len(board), all_cards)
+        is_flush_draw, flush_draw_num, flush_draw_suit, flush_draw_list = check_flush_draw(
+            suit_counts, len(board), all_cards
+        )
     is_straight_flush_draw, straight_flush_draw = check_straight_flush_draw(all_cards)
 
+    # 输出格式转换
+    high_card = card_value_inverse(high_card)
+    if one_pair:
+        one_pair = (card_value_inverse(one_pair[0]), one_pair[1])  # 对子点数转为字符
+    if two_pair:
+        two_pair = [card_value_inverse(rank) for rank in two_pair]
+    if three:
+        three = card_value_inverse(three)
+    if four:
+        four = card_value_inverse(four)
+    if straight_high:
+        straight_high = card_value_inverse(straight_high)
+    if flush_rank != -1:
+        flush_rank = card_value_inverse(flush_rank)
+    if straight_flush:
+        straight_flush = card_value_inverse(straight_flush)
+    if full_house:
+        full_house = (card_value_inverse(full_house[0]), card_value_inverse(full_house[1]))
+    if straight_draw:
+        straight_draw = [[card_value_inverse(rank) for rank in combo] for combo in straight_draw]
+    if flush_draw_list:
+        flush_draw_list = [card_value_inverse(rank) for rank in flush_draw_list]
+    if straight_flush_draw:
+        straight_flush_draw = [
+            [(card_value_inverse(rank), suit) for rank, suit in combo] for combo in straight_flush_draw
+        ]
+
+    # 返回结果
+    hand_rankings = {
+        "max_comb": max_comb,  # 最大组合
+        "high_card": high_card,
+        "one_pair": one_pair,
+        "two_pair": two_pair,
+        "three_of_a_kind": three,
+        "straight": straight_high,
+        "flush": [flush_rank, flush_suit],
+        "full_house": full_house,
+        "four_of_a_kind": four,
+        "straight_flush": straight_flush,
+    }
+
     draws = {
-        'straight_draw': straight_draw,
-        'flush_draw': [flush_draw_list, flush_draw_suit, flush_draw_num],
-        'striaght_flush_draw': straight_flush_draw
+        "straight_draw": straight_draw,
+        "flush_draw": [flush_draw_list, flush_draw_suit, flush_draw_num],
+        "straight_flush_draw": straight_flush_draw,
     }
 
     return hand_rankings, draws
 
 
+def evaluate_hand_with_board_filter(hand, board):
+    """
+    结合 evaluate_hand 和 evaluate_board 的结果，过滤掉 board 的听牌
+    """
+    # 调用 evaluate_hand 获取手牌+公共牌的结果
+    hand_rankings, hand_draws = evaluate_hand(hand, board)
+
+    # 调用 evaluate_board 获取 board 自身的听牌情况
+    board_rankings, board_draws = evaluate_board(board)
+
+    # 过滤 hand_draws 中与 board_draws 重叠的听牌
+    filtered_draws = {}
+    for key in hand_draws:
+        # 遍历每种听牌类型
+        if key in board_draws:
+            # 处理 flush_draw 的去重逻辑
+            if key == "flush_draw":
+                hand_flush_list, hand_suit, hand_num = hand_draws[key]
+                board_flush_list, board_suit, board_num = board_draws[key]
+
+                # 如果花色和缺牌数一致，清空整个 flush_draw
+                if hand_suit == board_suit and hand_num == board_num:
+                    filtered_draws[key] = [None, None, None]  # 清空整个 flush_draw
+                else:
+                    filtered_draws[key] = hand_draws[key]  # 保留其他内容
+
+            # 处理 straight_draw 的去重逻辑
+            elif key == "straight_draw":
+                hand_combinations = hand_draws[key] or []
+                board_combinations = board_draws[key] or []
+
+                # 使用集合过滤出不在 board 的听牌组合
+                filtered_combinations = [combo for combo in hand_combinations if combo not in board_combinations]
+                filtered_draws[key] = filtered_combinations if filtered_combinations else None  # 返回空列表
+
+            # 处理 straight_flush_draw 的去重逻辑
+            elif key == "straight_flush_draw":
+                hand_combinations = hand_draws[key] or []
+                board_combinations = board_draws[key] or []
+
+                # 使用集合过滤出不在 board 的听牌组合
+                filtered_combinations = [combo for combo in hand_combinations if combo not in board_combinations]
+                filtered_draws[key] = filtered_combinations if filtered_combinations else None  # 返回空列表
+
+            else:
+                # 保留其他听牌
+                filtered_draws[key] = hand_draws[key]
+        else:
+            # 不在 board_draws 中，直接保留
+            filtered_draws[key] = hand_draws[key]
+
+    return hand_rankings, filtered_draws
+
+
+def evaluate_group_with_board_filter(grouped_data, board):
+    """
+    计算分组结果中手牌和公共牌的结果，并根据 board 进行滥选
+    :param grouped_data: [[hand1, hand2], [hand3], ...] 格式的分组手牌
+    :param board: 公共牌
+    :return: 过滤后的分组结果，格式与 grouped_data 一致
+    """
+    filtered_group = []
+
+    for group in grouped_data:
+        filtered_subgroup = []
+        for hand in group:
+            hand_instance = Hand(hand)  # 将字符串应用为 Hand 类
+            hand_rankings, filtered_draws = evaluate_hand_with_board_filter(hand_instance, board)
+
+            # 只保留 max_comb 和其对应的结构
+            max_comb = hand_rankings["max_comb"]
+            value = hand_rankings.get(max_comb, None)
+            processed_rankings = {"max_comb": max_comb, "value": value}
+
+            filtered_subgroup.append((hand, processed_rankings, filtered_draws))
+        filtered_group.append(filtered_subgroup)
+
+    return filtered_group
+
+
 def card_value(rank):
-    if rank == 'A':
+    if rank == "A":
         return 14  # A 可以作为最大点数
-    elif rank == 'K':
+    elif rank == "K":
         return 13
-    elif rank == 'Q':
+    elif rank == "Q":
         return 12
-    elif rank == 'J':
+    elif rank == "J":
         return 11
-    elif rank == 'T':
+    elif rank == "T":
         return 10
     else:
         return int(rank)
+
+
+def card_value_inverse(value):
+    if value == 14:
+        return "A"
+    elif value == 13:
+        return "K"
+    elif value == 12:
+        return "Q"
+    elif value == 11:
+        return "J"
+    elif value == 10:
+        return "T"
+    else:
+        return str(value)
 
 
 def get_counts(items):
@@ -240,7 +434,7 @@ def check_straight(values):
         value_list.sort()
 
     for i in range(len(value_list) - 4):
-        window = value_list[i:i + 5]
+        window = value_list[i : i + 5]
         if window[4] - window[0] == 4 and len(window) == 5:
             return True, window[4]
     return False, None
@@ -272,7 +466,7 @@ def check_straight_draw(values, mode="hand"):
     N = 1
     if 14 in values:
         hand_ranks.add(1)
-    
+
     if mode == "hand":
         # 计算剩余的牌数量
         total_cards = 7  # 2 手牌 + 5 公共牌
@@ -281,7 +475,7 @@ def check_straight_draw(values, mode="hand"):
         # 计算剩余的牌数量
         total_cards = 5
         N = total_cards - len(values)
-        
+
     # 如果没有剩余的牌，直接返回 False 和空列表
     if N <= 0:
         return False, None
@@ -289,7 +483,7 @@ def check_straight_draw(values, mode="hand"):
     # 存储结果的列表
     missing_one_card_combinations = []
     missing_two_cards_combinations = []
-    
+
     for start in range(1, 11):  # 顺子的起始点数
         straight = set(range(start, start + 5))
         missing_cards = straight - hand_ranks
@@ -304,7 +498,7 @@ def check_straight_draw(values, mode="hand"):
             elif num_missing == 2:
                 if sorted_missing not in missing_two_cards_combinations:
                     missing_two_cards_combinations.append(sorted_missing)
-    
+
     # 遍历比较，删除重复的较大牌
     for combo_two in missing_two_cards_combinations[:]:
         larger_card = combo_two[-1]
@@ -312,13 +506,13 @@ def check_straight_draw(values, mode="hand"):
             if larger_card in combo_one:
                 missing_two_cards_combinations.remove(combo_two)
                 break  # 跳出内层循环，继续检查下一个组合
-    
+
     # 合并两个缺失牌组合的列表
     missing_combinations = missing_one_card_combinations + missing_two_cards_combinations
-    
+
     # 判断是否存在听顺
     has_straight_draw = bool(missing_combinations)
-    
+
     return has_straight_draw, missing_combinations
 
 
@@ -350,7 +544,7 @@ def check_straight_flush_draw(cards, mode="hand"):
         if num_cards_same_suit + N < 5:
             continue  # 不可能形成同花，检查下一个花色
         # 调用 check_straight_draw 函数
-        has_draw, missing_cards = check_straight_draw(values,N)
+        has_draw, missing_cards = check_straight_draw(values, mode)
 
         if has_draw:
             has_straight_flush_draw = True
@@ -364,10 +558,10 @@ def check_straight_flush_draw(cards, mode="hand"):
 
 def check_flush_draw(suit_counts, board_size, cards):
     # 标准扑克牌的数字
-    all_ranks = {'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'}
+    all_ranks = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}
 
     # 收集已经出现的花色和数字
-    seen_cards = {'c': set(), 'd': set(), 'h': set(), 's': set()}  # 各花色的已出现牌
+    seen_cards = {"c": set(), "d": set(), "h": set(), "s": set()}  # 各花色的已出现牌
     for rank, suit in cards:
         seen_cards[suit].add(rank)
 
@@ -392,34 +586,38 @@ def get_top_combinations(hands, weights, ev, effective_stack, top_n):
     """
 
     # 1. 将输入数据加载为DataFrame
-    data = pd.DataFrame({
-        'hands': hands,
-        'weights': weights,
-        'ev': ev
-    })
+    data = pd.DataFrame({"hands": hands, "weights": weights, "ev": ev})
 
     # 新增标签列label
-    data['label'] = np.where(
-        data['hands'].str[1] == data['hands'].str[3],
-        data['hands'].str[0] + data['hands'].str[2] + "s",
-        data['hands'].str[0] + data['hands'].str[2] + "o"
+    data["label"] = np.where(
+        data["hands"].str[1] == data["hands"].str[3],
+        data["hands"].str[0] + data["hands"].str[2] + "s",
+        data["hands"].str[0] + data["hands"].str[2] + "o",
     )
 
     # 2. 对EV进行归一化
-    data['ev_scaled'] = data['ev'] / effective_stack
+    data["ev_scaled"] = data["ev"] / effective_stack
 
-    # 3. 计算每个组合到(0, 0)的距离
-    data['distance'] = np.sqrt(data['weights'] ** 2 + data['ev_scaled'] ** 2)
+    # 3. 对weights进行归一化（min-max归一化）
+    weight_max = data["weights"].max()
+    weight_min = data["weights"].min()
+    if weight_max != weight_min:  # 避免除以零
+        data["weights_scaled"] = (data["weights"] - weight_min) / (weight_max - weight_min)
+    else:
+        data["weights_scaled"] = data["weights"]  # 如果最大值等于最小值，直接使用原值
 
-    # 4. 按距离排序
-    data = data.sort_values(by='distance', ascending=False)
+    # 4. 计算每个组合到(0, 0)的距离
+    data["distance"] = np.sqrt(data["weights_scaled"] ** 2 + data["ev_scaled"] ** 2)
 
-    # 5. 选择前 top_n + 1 个不同 label 的组合（允许重复，但同一label不计入计数）
+    # 5. 按距离排序
+    data = data.sort_values(by="distance", ascending=False)
+
+    # 6. 选择前 top_n + 1 个不同 label 的组合（允许重复，但同一label不计入计数）
     unique_labels = set()
     top_combinations = []
 
     for _, row in data.iterrows():
-        label = row['label']
+        label = row["label"]
         if label not in unique_labels:
             unique_labels.add(label)
             top_combinations.append(row)
@@ -428,10 +626,31 @@ def get_top_combinations(hands, weights, ev, effective_stack, top_n):
         else:
             top_combinations.append(row)
 
-    # 6. 去掉最后一个组合，确保仅有 top_n 个不同的label
+    # 7. 去掉最后一个组合，确保仅有 top_n 个不同的label
     if len(unique_labels) > top_n:
         top_combinations = top_combinations[:-1]
 
-    # 7. 转换为 DataFrame 并返回 hands, weights, ev 和 label
+    # 8. 转换为 DataFrame 并返回 hands, weights, ev 和 label
     top_combinations_df = pd.DataFrame(top_combinations)
-    return top_combinations_df[['hands', 'weights', 'ev', 'label']]
+
+    # 9. 根据label对组合进行分组
+    grouped_data = []
+    for label, group in top_combinations_df.groupby("label", sort=False):
+        group = group.sort_values(by="distance", ascending=False)
+        distances = group["distance"].values
+
+        # 检查距离并分组
+        split_indices = [0]
+        for i in range(len(distances) - 1):
+            if distances[i] - distances[i + 1] > 0.04:
+                split_indices.append(i + 1)
+
+        split_indices.append(len(distances))
+
+        # 分组后将分组添加到结果集合
+        for i in range(len(split_indices) - 1):
+            start, end = split_indices[i], split_indices[i + 1]
+            grouped_data.append(group.iloc[start:end]["hands"].tolist())
+
+    # 10. 返回分组结果
+    return top_combinations_df[["hands", "weights", "ev", "label", "distance"]], grouped_data
