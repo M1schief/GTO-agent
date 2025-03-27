@@ -58,7 +58,7 @@ async fn get_gto(data: web::Json<GetGtoRequest>) -> impl Responder {
     .map(|s| card_from_str(s).unwrap_or(NOT_DEALT))
     .unwrap_or(NOT_DEALT);
     let effective_stk = data.effective_stk.unwrap_or(100);
-    let pot = data.pot.unwrap_or(10);
+    let pot = data.pot.unwrap_or(20);
 
 
     let mut hand_ranges: HashMap<&str, &str> = HashMap::new();
@@ -78,14 +78,14 @@ async fn get_gto(data: web::Json<GetGtoRequest>) -> impl Responder {
     let card_config = CardConfig {
         range: [oop_range.parse().unwrap(), ip_range.parse().unwrap()],
         flop: flop_from_str(&data.flop).unwrap(),
-        turn: turn,
+        turn: NOT_DEALT,
         river: NOT_DEALT
     };
 
-    let bet_sizes = BetSizeOptions::try_from(("60%, e, a", "2.5x")).unwrap();
+    let bet_sizes = BetSizeOptions::try_from(("30%, e, a", "2.5x")).unwrap();
     
     let tree_config = TreeConfig {
-        initial_state: BoardState::Turn, // must match `card_config`
+        initial_state: BoardState::Flop, // must match `card_config`
         starting_pot: pot,
         effective_stack: effective_stk,
         rake_rate: 0.0,
@@ -96,7 +96,7 @@ async fn get_gto(data: web::Json<GetGtoRequest>) -> impl Responder {
         turn_donk_sizes: None, // use default bet sizes
         river_donk_sizes: Some(DonkSizeOptions::try_from("50%").unwrap()),
         add_allin_threshold: 1.5, // add all-in if (maximum bet size) <= 1.5x pot
-        force_allin_threshold: 0.15, // force all-in if (SPR after the opponent's call) <= 0.15
+        force_allin_threshold: 0.20, // force all-in if (SPR after the opponent's call) <= 0.15
         merging_threshold: 0.1,
     };
 
@@ -116,7 +116,7 @@ async fn get_gto(data: web::Json<GetGtoRequest>) -> impl Responder {
     // allocate memory without compression (use 32-bit float)
     game.allocate_memory(false);
     // solve the game
-    let max_num_iterations = 1000;
+    let max_num_iterations = 10;
     let target_exploitability = game.tree_config().starting_pot as f32 * 0.005; // 0.5% of the pot
     let exploitability = solve(&mut game, max_num_iterations, target_exploitability, true);
     println!("Exploitability: {:.2}", exploitability);
@@ -245,6 +245,8 @@ async fn get_gto(data: web::Json<GetGtoRequest>) -> impl Responder {
     .collect();
 
     let user_cards = game.private_cards(user_index);
+
+    println!("user_cards: {:?}", user_cards);
 
     let hand_index = holes_to_strings(user_cards)
         .unwrap()
