@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker GTO Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 100px;
+            white-space: pre-wrap;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .example {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Poker GTO Analysis</h1>
+        <div class="form-group">
+            <label for="input">Enter Game Information:</label>
+            <textarea id="input" rows="10" placeholder="输入当前信息，请至少包含双方位置、玩家手牌、公共牌面和双方动作"></textarea>
+            <div class="example">
+                示例: 玩家位置BTN，对手位置BB。玩家手牌Jd9d。翻牌是Td6c4S，对手Bet(6)，玩家Call。转牌是Ah，对手Bet(12)。
+            </div>
+        </div>
+        <button onclick="processInput()">Analyze</button>
+        <div id="loading" class="loading">Processing...</div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function processInput() {
+            const input = document.getElementById('input').value;
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            try {
+                loading.style.display = 'block';
+                result.textContent = '';
+                
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: input })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.textContent = data.result;
+                } else {
+                    result.textContent = 'Error: ' + data.error;
+                }
+            } catch (error) {
+                result.textContent = 'Error: ' + error.message;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html> 

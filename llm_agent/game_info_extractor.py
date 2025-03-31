@@ -5,9 +5,74 @@ import json
 import openai
 
 
-def extract_poker_info() -> Dict[str, Any]:
-    input_text = input("请输入当前信息，请至少包含双方位置、玩家手牌、公共牌面和双方动作：")
+def format_card(card: str) -> str:
+    """Format a single card to have valid rank and suit."""
+    valid_ranks = ["A", "K", "Q", "J", "T"] + [str(n) for n in range(2, 10)]
+    valid_suits = ["h", "d", "s", "c"]
 
+    # Convert to lowercase and remove any whitespace
+    card = card.lower().strip()
+
+    # Handle empty or invalid cards
+    if not card:
+        return ""
+
+    # Extract rank and suit
+    rank = card[0].upper()  # First character as rank
+    suit = card[-1].lower()  # Last character as suit
+
+    # Validate and format
+    if rank in valid_ranks and suit in valid_suits:
+        return f"{rank}{suit}"
+    return ""
+
+
+def format_cards_array(cards: List[str]) -> List[str]:
+    """Format an array of cards, ensuring each card is valid."""
+    if not cards:
+        return []
+
+    # Format each card and filter out invalid ones
+    formatted_cards = [format_card(card) for card in cards]
+    valid_cards = [card for card in formatted_cards if card]
+    return valid_cards
+
+
+def format_game_info(game_info: Dict[str, Any]) -> Dict[str, Any]:
+    """Format game information according to specific rules."""
+    formatted_info = game_info.copy()
+
+    # Format positions to uppercase
+    formatted_info["user_position"] = game_info["user_position"].upper()
+    formatted_info["opponent_position"] = game_info["opponent_position"].upper()
+
+    # Format cards arrays and validate
+    for card_field in ["flop", "turn", "river"]:
+        if game_info.get(card_field):
+            formatted_info[card_field] = format_cards_array(game_info[card_field])
+
+    # Format actions
+    plain_actions = ["Fold", "Call", "Check"]
+    formatted_actions = []
+
+    for action in game_info.get("actions", []):
+        # Handle Bet/Raise/AllIn with amounts
+        if action.startswith(("Bet(", "Raise(", "AllIn(")):
+            try:
+                amount = int(action.split("(")[1].rstrip(")"))
+                action_type = action.split("(")[0]
+                formatted_actions.append(f"{action_type}({amount})")
+            except (ValueError, IndexError):
+                continue
+        # Handle simple actions
+        elif action in plain_actions:
+            formatted_actions.append(action)
+
+    formatted_info["actions"] = formatted_actions
+    return formatted_info
+
+
+def extract_poker_info(input_text: str) -> Dict[str, Any]:
     game_info_empty = {
         "user_position": "",
         "opponent_position": "",
@@ -33,9 +98,9 @@ def extract_poker_info() -> Dict[str, Any]:
     {{
         "user_position": "position",
         "opponent_position": "position",
-        "flop": "cards",
-        "turn": "card",
-        "river": "card",
+        "flop": ["cards1","cards2","cards3"],
+        "turn": ["cards4"],
+        "river": ["cards5"],
         "actions": ["action1", "action2", ...],
         "user_hand": "cards"
     }}
@@ -61,8 +126,9 @@ def extract_poker_info() -> Dict[str, Any]:
         match = re.search(r"\{.*\}", result, re.DOTALL)
         if match:
             game_info = json.loads(match.group(0))
-            json.dump(game_info, open("game_info.json", "w"))
-            return game_info
+            formatted_info = format_game_info(game_info)
+            json.dump(formatted_info, open("game_info.json", "w"))
+            return formatted_info
         else:
             return "Error extracting poker information: {str(e)}"
 
@@ -73,8 +139,10 @@ def extract_poker_info() -> Dict[str, Any]:
 
 def main():
     # Example usage
-    print("Please enter the poker game information:")
-    result = extract_poker_info()
+    input_text = input(
+        "输入当前信息，请至少包含双方位置、玩家手牌、公共牌面和双方动作："
+    )
+    result = extract_poker_info(input_text)
     json.dump(result, open("game_info.json", "w"))
     print("\nExtracted Information:")
     print(result)

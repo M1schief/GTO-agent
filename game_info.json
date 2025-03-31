@@ -1,1 +1,1 @@
-{"user_position": "BTN", "opponent_position": "BB", "flop": "Td6c4s", "turn": "Ah", "river": "", "actions": ["Bet(6)", "Call", "Bet(18)"], "user_hand": "Jd9d"}
+{"user_position": "BTN", "opponent_position": "BB", "flop": ["Td", "6c", "4s"], "turn": ["Ah"], "river": [], "actions": ["Bet(6)", "Call", "Bet(12)"], "user_hand": "Jd9d"}

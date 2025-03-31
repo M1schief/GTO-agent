@@ -89,7 +89,9 @@ def prepare_analysis1(board: list) -> str:
     if len(board) >= 4:
         analysis1 += f"转牌面是{board[3]}，{board[0]}，{board[1]}，{board[2]}\n"
     if len(board) == 5:
-        analysis1 += f"河牌面是{board[4]}，{board[3]}，{board[0]}，{board[1]}，{board[2]}\n"
+        analysis1 += (
+            f"河牌面是{board[4]}，{board[3]}，{board[0]}，{board[1]}，{board[2]}\n"
+        )
     _, draws = evaluate_board(Board(board))
     stage = STAGE_MAP[len(board) - 3]
     if draws["straight_draw"]:
@@ -107,22 +109,28 @@ def prepare_analysis1(board: list) -> str:
     return analysis1
 
 
-def prepare_analysis2(op_range: list, op_weight: list, op_ev: list, board: list, effective_stack: int) -> str:
+def prepare_analysis2(
+    op_range: list, op_weight: list, op_ev: list, board: list, effective_stack: int
+) -> str:
     # TODO
     top_n = 5
-    tops = get_top_combinations(op_range, op_weight, op_ev, effective_stack=effective_stack, top_n=top_n)
+    tops = get_top_combinations(
+        op_range, op_weight, op_ev, effective_stack=effective_stack, top_n=top_n
+    )
     hands_label = tops[0]["label"].drop_duplicates().tolist()
     hands_group = tops[1]
-    print(board)
-    print(hands_group)
 
     assert len(hands_label) == top_n
 
     analysis2 = ""
     for i in range(top_n):
         hand = hands_group[i][0]
-        op_hand_rankings, op_draws = evaluate_hand_with_board_filter(Hand([hand[:2], hand[2:]]), Board(board))
-        analysis2 = analysis2 + hands_label[i] + "，" + TERM_MAP[op_hand_rankings["max_comb"]]
+        op_hand_rankings, op_draws = evaluate_hand_with_board_filter(
+            Hand([hand[:2], hand[2:]]), Board(board)
+        )
+        analysis2 = (
+            analysis2 + hands_label[i] + "，" + TERM_MAP[op_hand_rankings["max_comb"]]
+        )
         if op_draws["straight_flush_draw"]:
             analysis2 += "，同花顺听牌"
         else:
@@ -140,7 +148,9 @@ def prepare_analysis3(hand: str, board: list) -> str:
     for i in range(stage_id + 1):
         if i > 0:
             analysis3 += "\n\n"
-        hand_rankings, draws = evaluate_hand_with_board_filter(Hand([hand[:2], hand[2:]]), Board(board[: 3 + i]))
+        hand_rankings, draws = evaluate_hand_with_board_filter(
+            Hand([hand[:2], hand[2:]]), Board(board[: 3 + i])
+        )
         analysis3 = (
             analysis3
             + STAGE_MAP[i]
@@ -149,7 +159,11 @@ def prepare_analysis3(hand: str, board: list) -> str:
             + str(hand_rankings[hand_rankings["max_comb"]])
         )
         if draws["straight_draw"]:
-            analysis3 = analysis3 + "\n玩家顺子听牌，听" + "，或".join(["".join(x) for x in draws["straight_draw"]])
+            analysis3 = (
+                analysis3
+                + "\n玩家顺子听牌，听"
+                + "，或".join(["".join(x) for x in draws["straight_draw"]])
+            )
         else:
             analysis3 += "\n玩家不可能成顺子"
         if draws["flush_draw"][0]:
@@ -169,7 +183,10 @@ def prepare_analysis3(hand: str, board: list) -> str:
                 analysis3
                 + "\n玩家同花顺听牌，听"
                 + "，或".join(
-                    [f"{card1[0]}{card1[1]}{card2[0]}{card2[1]}" for card1, card2 in draws["straight_flush_draw"]]
+                    [
+                        f"{card1[0]}{card1[1]}{card2[0]}{card2[1]}"
+                        for card1, card2 in draws["straight_flush_draw"]
+                    ]
                 )
             )
         elif draws["straight_draw"] and draws["flush_draw"][0]:
@@ -194,14 +211,15 @@ def prepare_prompt(user_data: dict) -> str:
         "user_spt": user_data["user_position"],
         "opponent_spt": user_data["opponent_position"],
         "user_hand": user_data["user_hand"],
-        "flop": user_data["flop"],
-        "turn": user_data["turn"] if user_data["turn"] else "",
-        "river": user_data["river"] if user_data["river"] else "",
+        "flop": "".join(user_data["flop"]),
+        "turn": user_data["turn"][0] if user_data["turn"] else "",
+        "river": user_data["river"][0] if user_data["river"] else "",
         "actions": actions,
     }
+    json.dump(data, open("game_info_processed.json", "w"))
     response = requests.post("http://127.0.0.1:8080/demo/getGto", json=data)
     response = response.json()
-    print(response)
+    # print(response)
 
     board_str = data["flop"] + data["turn"] + data["river"]
     board = [board_str[i : i + 2] for i in range(0, len(board_str), 2)]
@@ -219,9 +237,13 @@ def prepare_prompt(user_data: dict) -> str:
 
     action_space = response["available_actions"]
     action_probs = response["available_actions_probability"]
-    gto = ", ".join([f"{action_space[n]}:{action_probs[n]*100}%" for n in range(len(action_space))])
+    gto = ", ".join(
+        [f"{action_space[n]}:{action_probs[n]*100}%" for n in range(len(action_space))]
+    )
 
-    nonzero_index = [i for i, x in enumerate(response["opponent_hands_weights"]) if x > 1e-4]
+    nonzero_index = [
+        i for i, x in enumerate(response["opponent_hands_weights"]) if x > 1e-4
+    ]
 
     # prepare analysis
     analysis1 = prepare_analysis1(board)
@@ -291,7 +313,8 @@ def explain(sys_prompt: str, user_prompt: str, model: str) -> str:
         )
         chinese_response = client.models.generate_content(
             model="gemini-2.0-flash",
-            contents="Translate the following text into Chinese: " + english_response.text,
+            contents="Translate the following text into Chinese: "
+            + english_response.text,
         )
         return chinese_response.text
     return "LLM model error"
@@ -306,7 +329,11 @@ def main() -> None:
     """The main function."""
     args = parse_arguments()
 
-    user_data = extract_poker_info()
+    input_text = input(
+        "请输入当前信息，请至少包含双方位置、玩家手牌、公共牌面和双方动作："
+    )
+
+    user_data = extract_poker_info(input_text)
     # user_data = json.load(open("game_info.json"))
     prepare_prompt(user_data)
 
@@ -321,4 +348,4 @@ def main() -> None:
         f.close()
 
 
-main()
+# main()
